@@ -181,3 +181,4 @@ redisConfig:
     cpu: 2
     memory: 8G
 ```
+# EDCOP-SURICATA
