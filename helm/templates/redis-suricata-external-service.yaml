@@ -1,0 +1,17 @@
+{{ if ne .Values.deploymentOptions.deployment "standalone"  }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ template "suricata.fullname" . }}-redis-suricata"
+spec:
+  type: NodePort
+  ports:
+    -
+      name: cport-6379
+      protocol: "TCP"
+      port: 6379
+      targetPort: 6379
+      nodePort: {{ .Values.deploymentOptions.externalOptions.nodePort }}
+  selector: 
+    app: suricata
+{{ end }}

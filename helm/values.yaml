@@ -1,0 +1,78 @@
+# EDCOP Suricata Chart values
+images:
+  #Repositories to pull images from
+  suricata: gcr.io/edcop-public/suricata:2
+  logstash: docker.elastic.co/logstash/logstash:6.2.4
+  redis: redis:4.0.9
+networks:
+  # Overlay is the name of the default cni network
+  overlay: 'calico'
+  # Net 1 is the name of the first interface
+  net1: 'inline-1'
+  # Net 2 is the name of the second interface  This will be ignored when passive is selected
+  net2: 'inline-2'
+#NodeSelector can be used when it is desired to over-ride the default sensor.  For example, if it was desired to specify passive and inline sections of the network.
+nodeSelector:
+  nodetype: 'worker'
+deploymentOptions:
+  #The three options for deployment are standalone, cluster and external.  Please see the documentation on deploy options for definitions and special considerations.
+  deployment: 'standalone'
+  #Below options are only used in external mode when sending to a Redis queue outside of the cluster
+  externalOptions:
+    externalHost: 172.31.20.90
+    nodePort: 30029
+suricataConfig:
+  #If inline is set to true the Suricata pod will have three network interfaces, and will be set to take layer 2 traffic in and output it to the other interface as well as connected to the overlay network.  If the option is set to false then Suricata will have two interfaces, one for the passive and the other for the network.
+  inline: true 
+  #Specifies internal networks that will be monitored.  This sets the direction of rules.
+  homeNet: '[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]'
+  #These are the IPs outside of yout network.  This generally is set to !$HOME_NET which is everything not in the homeNet variable.
+  externalNet: '!$HOME_NET'
+  #Specifies the threads that will be used by AF-PACKET
+  net0Threads: 1
+  net1Threads: 1
+  #If CPU Affinity is set to no then Suricata will share CPU resources with other tools by using the OS scheduler.  If you set this option to Yes, you will be responsible for configuring which threads the various components use.  See the below link for more details:
+  #http://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html#threading
+  #If you need to specify mulitple cores, the syntax is: '"9-11","25-27"'  
+  setCpuAffinity: no
+  managementCpuSet: 1
+  receiveCpuSet: 1
+  workerCpuSet: 1
+  workerThreads: 1
+  verdictCpuSet: 1
+  # Requests are set to accomodate limited resource VMs
+  requests:
+    cpu: 100m
+    memory: 64Mi           
+  #These limit the number of CPU cores and memory the sensor can use.
+  limits:
+    cpu: 2
+    memory: 4G
+#Logstash values will be ignored if standalone is set to true as no logstash will be built.
+logstashConfig:
+  #Limits the number of threads that will be used by Logstash
+  threads: 2 
+  #Configures the batch count that Logstash will process at a time.
+  batchCount: 250
+  #Sets the initial and max JVM heap that will be allocated, generally these two values should be the same.
+  initialJvmHeap: 4g
+  maxJvmHeap: 4g
+  #Sets the number of workers for pulling Redis events
+  pipelineOutputWorkers: 2 
+  #Sets the amount of events grabbed from Redis at one time.
+  pipelineBatchSize: 150 
+  requests:
+    cpu: 100m
+    memory: 64Mi 
+  limits:
+    cpu: 2
+    memory: 8G
+#These values will be ignored if standalone is set to true as Redis will not be built
+redisConfig:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  #limits the CPU and Memory of Redis.
+  limits:
+    cpu: 2
+    memory: 8G

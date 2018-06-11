@@ -1,0 +1,30 @@
+{{ if eq .Values.deploymentOptions.deployment "standalone"  }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-{{ template "suricata.fullname" . }}-pipeline
+data:
+  suricata.conf: |
+    input {
+      redis {
+        host => "localhost"
+        key => "suricata"
+        data_type => "list"
+        codec => json
+        batch_count => {{  .Values.logstashConfig.batchCount }}
+        threads => 4
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => "data-service:9200"
+        manage_template => false
+        index => "suricata-%{+YYYY.MM.dd}"
+        document_type => "event"
+        codec => json
+        #user => logstash_internal
+        #password => changeme
+      }
+    }
+{{ end }}

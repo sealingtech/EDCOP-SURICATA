@@ -1,0 +1,109 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "suricata.fullname" . }}
+  namespace: default
+  labels:
+    app: suricata
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: suricata
+  template:
+    metadata:
+      name: {{ template "suricata.name" . }}
+      labels:
+        app: suricata
+      annotations:
+      {{ if .Values.suricataConfig.inline }}
+        networks: '[
+        { "name": "{{  .Values.networks.overlay }}" },
+        { "name": "{{  .Values.networks.net1 }}" },
+        { "name": "{{  .Values.networks.net2 }}" }
+      ]'
+      {{ else }}
+        networks: '[
+        { "name": "{{  .Values.networks.overlay }}" },
+        { "name": "{{  .Values.networks.net1 }}" }
+      ]'
+      {{ end }}
+    spec:
+      containers:
+      - name: suricata
+        image: {{ .Values.images.suricata }}
+        stdin: true
+        command: ["docker-entrypoint.sh"]
+        tty: true
+        securityContext:
+          capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_NICE #Needed for CPU pinning
+        volumeMounts:
+          - mountPath: /etc/suricata
+            name: suricata-config
+          - mountPath: /data/suricata
+            name: suricata-logs
+        resources:
+          requests:
+            cpu: "{{ .Values.suricataConfig.requests.cpu }}"
+            memory: "{{ .Values.suricataConfig.requests.memory }}"
+          limits:
+            cpu: "{{ .Values.suricataConfig.limits.cpu }}"
+            memory: "{{ .Values.suricataConfig.limits.memory }}"
+      - name: redis
+        image: {{ .Values.images.redis }}
+        imagePullPolicy: Always
+        ports:
+        - name: cport-6379
+          containerPort: 6379
+        resources:
+          requests:
+            cpu: "{{ .Values.redisConfig.requests.cpu }}"
+            memory: "{{ .Values.redisConfig.requests.memory }}"
+          limits:
+            cpu: "{{ .Values.redisConfig.limits.cpu }}"
+            memory: "{{ .Values.redisConfig.limits.memory }}"
+      {{ if eq .Values.deploymentOptions.deployment "standalone"  }}
+      - name: logstash
+        image: {{ .Values.images.logstash }}
+        imagePullPolicy: Always
+        ports:
+        - name: cport-5044
+          containerPort: 5044
+        resources:
+          requests:
+            cpu: "{{ .Values.logstashConfig.requests.cpu }}"
+            memory: "{{ .Values.logstashConfig.requests.memory }}"
+          limits:
+            cpu: "{{ .Values.logstashConfig.limits.cpu }}"
+            memory: "{{ .Values.logstashConfig.limits.memory }}"
+        volumeMounts:
+          - mountPath: /usr/share/logstash/pipeline/
+            name: logstash-suricata-pipeline
+          - mountPath: /usr/share/logstash/config
+            name: logstash-suricata-config
+      {{ end }}
+
+      volumes:
+      - name: suricata-logs
+        emptyDir: {}
+      - name: suricata-config
+        configMap:
+          name: {{ template "suricata.fullname" . }}-config
+      {{ if eq .Values.deploymentOptions.deployment "standalone"  }}
+      - name: logstash-suricata-config
+        configMap:
+          name: logstash-{{ template "suricata.fullname" . }}-config
+      - name: logstash-suricata-pipeline
+        configMap:
+          name: logstash-{{ template "suricata.fullname" . }}-pipeline
+      {{ end }}
+      
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        nodetype: worker
