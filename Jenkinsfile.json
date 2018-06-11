@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "edcop-suricata",
+    "test": true,
+  },
+  "container_repo": {
+    "host": "gcr.io",
+    "master_acct": "daniel.lohin@sealingtech.com",
+    "alt_acct": "daniel.lohin@sealingtech.com",
+    "jenkins_creds_id": "gcr-dlohin",
+    "repo": "edcop-public",
+    "dockeremail": ".",
+    "dockerfile": "./",
+    "image_scanning": false
+  },
+  "pipeline": {
+      "enabled": true,
+      "debug": false,
+      "library": {
+        "branch": "dev"
+      }
+  }
+}
