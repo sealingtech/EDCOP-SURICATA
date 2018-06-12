@@ -13,11 +13,8 @@ node {
   def pwd = pwd()
   def chart_dir = "$pwd/helm/"
   def container_dir = "$pwd/container/"
-  wrap([$class: 'BuildUser']) {
-     var build_user = "${BUILD_USER}"
-  }
   
-  def container_tag = "gcr.io/edcop-public/$build_user-suricata"
+  def container_tag = "gcr.io/edcop-public/suricata"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
 
@@ -31,8 +28,10 @@ node {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
       println("Building $container_tag:$env.BUILD_ID")
-
-      sh "env"
+      wrap([$class: 'BuildUser']) {
+        var build_user = "${BUILD_USER}"
+      }
+      
 
       app = docker.build("$container_tag:$env.BUILD_ID","./container/")
   }
