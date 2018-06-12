@@ -16,13 +16,10 @@ node {
   
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
-  script {
-        wrap([$class: 'BuildUser']) {
-
-            env.user_name = "${BUILD_USER}"
-        }
+  wrap([$class: 'BuildUser']) {
+      echo "userId=${BUILD_USER_ID},fullName=${BUILD_USER},email=${BUILD_USER_EMAIL}"
   }
-  def container_tag = "gcr.io/edcop-public/$env.user_name-suricata"
+  def container_tag = "gcr.io/edcop-public/suricata"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
