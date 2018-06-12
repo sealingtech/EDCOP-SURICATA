@@ -20,12 +20,12 @@ node {
   wrap([$class: 'BuildUser']) {
       echo "userId=${BUILD_USER_ID},fullName=${BUILD_USER},email=${BUILD_USER_EMAIL}"
       environment {
-        USER_ID = ${BUILD_USER_ID}
+        USER_ID = "${BUILD_USER_ID}"
       }    
   }
 
   sh "env"
-  
+
   def container_tag = "gcr.io/edcop-public/${env.USER_ID}-suricata"
 
   stage('Clone repository') {
