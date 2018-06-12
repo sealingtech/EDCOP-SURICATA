@@ -29,9 +29,9 @@ node {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
       dir "$container_dir"
-      //println("Building $container_tag:$env.BUILD_NUMBER")
+      println("Building $container_tag:$env.BUILD_ID")
 
-      app = docker.build("$container_tag:$env.BUILD_NUMBER")
+      app = docker.build("$container_tag:$env.BUILD_ID")
   }
 
 
@@ -41,7 +41,7 @@ node {
        * Second, the 'latest' tag.
        * Pushing multiple tags is cheap, as all the layers are reused. */
       docker.withRegistry('https://gcr.io/edcop-public/', 'gcr:edcop-public') {
-          app.push("$env.BUILD_NUMBER")
+          app.push("$env.BUILD_ID")
       }
   }
 
@@ -50,7 +50,7 @@ node {
   }
 
   stage('helm deploy') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_NUMBER' -f $custom_values_url helm"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url helm"
   }
 
 }
