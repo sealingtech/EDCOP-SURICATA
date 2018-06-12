@@ -29,7 +29,7 @@ node {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
       dir "$container_dir"
-      println("Building $container_tag:$env.BUILD_NUMBER")
+      //println("Building $container_tag:$env.BUILD_NUMBER")
 
       app = docker.build("$container_tag:$env.BUILD_NUMBER")
   }
