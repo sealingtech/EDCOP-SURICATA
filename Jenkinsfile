@@ -14,7 +14,7 @@ node {
   def chart_dir = "$pwd/helm/"
   def container_dir = "$pwd/container/"
   wrap([$class: 'BuildUser']) {
-     var build_user = ${BUILD_USER}"
+     var build_user = "${BUILD_USER}"
   }
   
   def container_tag = "gcr.io/edcop-public/$build_user-suricata"
