@@ -10,6 +10,10 @@ def pipeline = new io.estrado.Pipeline()
 node {
   def app
 
+  environment {
+      USER_ID = null
+  }
+
   def pwd = pwd()
   def chart_dir = "$pwd/helm/"
   def container_dir = "$pwd/container/"
@@ -17,9 +21,9 @@ node {
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
   wrap([$class: 'BuildUser']) {
       echo "userId=${BUILD_USER_ID},fullName=${BUILD_USER},email=${BUILD_USER_EMAIL}"
-      def user_id = ${BUILD_USER_ID}
+      env.USER_ID = ${BUILD_USER_ID}
   }
-  def container_tag = "gcr.io/edcop-public/$user_id-suricata"
+  def container_tag = "gcr.io/edcop-public/${env.USER_ID}-suricata"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
