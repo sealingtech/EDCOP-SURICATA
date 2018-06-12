@@ -19,7 +19,7 @@ node {
   script {
         wrap([$class: 'BuildUser']) {
 
-            var user_name = "${BUILD_USER}"
+            def user_name = "${BUILD_USER}"
         }
   }
   def container_tag = "gcr.io/edcop-public/$user_name-suricata"
