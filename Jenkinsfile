@@ -45,11 +45,10 @@ node {
   }
 
   stage('helm lint') {
-      sh 'helm lint helm' 
+      sh 'helm lint suricata' 
   }
 
   stage('helm deploy') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url helm"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url suricata"
   }
-
 }
