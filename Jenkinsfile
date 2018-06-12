@@ -23,6 +23,9 @@ node {
         USER_ID = ${BUILD_USER_ID}
       }    
   }
+
+  sh "env"
+  
   def container_tag = "gcr.io/edcop-public/${env.USER_ID}-suricata"
 
   stage('Clone repository') {
