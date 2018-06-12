@@ -30,7 +30,7 @@ node {
        * docker build on the command line */
        dir ${container_dir}
 
-      app = docker.build('${container_tag}:${env.BUILD_NUMBER}')
+      app = docker.build("${container_tag}:${env.BUILD_NUMBER}")
   }
 
 
