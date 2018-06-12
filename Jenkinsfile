@@ -17,9 +17,10 @@ node {
   def container_dir = "$pwd/container/"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
+  def user_id = ''
   wrap([$class: 'BuildUser']) {
       echo "userId=${BUILD_USER_ID},fullName=${BUILD_USER},email=${BUILD_USER_EMAIL}"
-      def user_id = "${BUILD_USER_ID}"
+      user_id = "${BUILD_USER_ID}"
   }
 
   sh "env"
