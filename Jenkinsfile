@@ -13,7 +13,11 @@ node {
   def pwd = pwd()
   def chart_dir = "$pwd/helm/"
   def container_dir = "$pwd/container/"
-  def container_tag = "gcr.io/edcop-public/$BUILD_USER_ID-suricata"
+  def user_id
+  wrap([$class: 'BuildUser']) {
+    $user_id = ${BUILD_USER_ID}
+  }
+  def container_tag = "gcr.io/edcop-public/$user_id-suricata"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
 
