@@ -19,10 +19,10 @@ node {
   script {
         wrap([$class: 'BuildUser']) {
 
-            def user_name = "${BUILD_USER}"
+            env.user_name = "${BUILD_USER}"
         }
   }
-  def container_tag = "gcr.io/edcop-public/$user_name-suricata"
+  def container_tag = "gcr.io/edcop-public/$env.user_name-suricata"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
