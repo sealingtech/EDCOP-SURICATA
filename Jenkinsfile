@@ -29,7 +29,7 @@ def pipeline = new io.estrado.Pipeline()
          * docker build on the command line */
          dir ${container_dir}
 
-        app = docker.build(${container_tag}:${env.BUILD_NUMBER})
+        app = docker.build('${container_tag}:${env.BUILD_NUMBER}'')
     }
 
 
@@ -48,7 +48,7 @@ def pipeline = new io.estrado.Pipeline()
     }
 
     stage('helm deploy') {
-        sh 'helm install --set ${custom_image}=${container_tag}:${env.BUILD_NUMBER} -f ${custom_values_url} helm' 
+        sh 'helm install --set ${custom_image}='${container_tag}:${env.BUILD_NUMBER}'' -f ${custom_values_url} helm' 
     }
 
   }
