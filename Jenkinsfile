@@ -17,7 +17,14 @@ node {
   def container_tag = "gcr.io/edcop-public/suricata"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
+  script {
+        wrap([$class: 'BuildUser']) {
 
+            var user_name = "${BUILD_USER}"
+        }
+  }
+  def container_tag = "gcr.io/edcop-public/$user_name-suricata"
+  
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
       checkout scm
@@ -28,10 +35,6 @@ node {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
       println("Building $container_tag:$env.BUILD_ID")
-      wrap([$class: 'BuildUser']) {
-        var build_user = "${BUILD_USER}"
-      }
-      
 
       app = docker.build("$container_tag:$env.BUILD_ID","./container/")
   }
