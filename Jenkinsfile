@@ -15,7 +15,7 @@ node {
   def container_dir = "$pwd/container/"
   def user_id
   wrap([$class: 'BuildUser']) {
-    $user_id = ${BUILD_USER_ID}
+    user_id = ${BUILD_USER_ID}
   }
   def container_tag = "gcr.io/edcop-public/$user_id-suricata"
   def custom_image = "images.suricata"
