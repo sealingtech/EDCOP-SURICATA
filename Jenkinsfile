@@ -11,8 +11,8 @@ node {
   def app
 
   def pwd = pwd()
-  def chart_dir = "${pwd}/helm/"
-  def container_dir = "${pwd}/container/"
+  def chart_dir = "$pwd/helm/"
+  def container_dir = "$pwd/container/"
   def container_tag = "gcr.io/edcop-public/suricata"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
@@ -28,7 +28,7 @@ node {
   stage('Build image') {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
-      dir $container_dir
+      dir "$container_dir"
       println("Building $container_tag:$env.BUILD_NUMBER")
 
       app = docker.build("$container_tag:$env.BUILD_NUMBER")
