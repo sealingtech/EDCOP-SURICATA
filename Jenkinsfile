@@ -14,7 +14,6 @@ node {
   def chart_dir = "$pwd/helm/"
   def container_dir = "$pwd/container/"
   
-  def container_tag = "gcr.io/edcop-public/suricata"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
   script {
@@ -24,7 +23,7 @@ node {
         }
   }
   def container_tag = "gcr.io/edcop-public/$user_name-suricata"
-  
+
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
       checkout scm
