@@ -60,6 +60,24 @@ node {
   stage('helm deploy') {
       sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
+
+  stage('sleeping 4 minutes') {
+    sleep(24000)
+  }
+
+  stage('Verifying running pods') {
+    def number_ready=sh "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}"
+    def number_scheduled=sh "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}"
+
+    if(number_ready==number_scheduled) {
+      println("Pods are running")
+    } else {
+      error("Some or all Pods failed")
+    }
+  }
+
+  
+
   stage('running traffic') {
       sshagent(credentials: ['jenkins']) {
         sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
