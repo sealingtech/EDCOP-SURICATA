@@ -14,6 +14,7 @@ node {
 
   def pwd = pwd()
   def chart_dir = "$pwd/helm/"
+  def tool_name = "suricata"
   def container_dir = "$pwd/container/"
   def custom_image = "images.suricata"
   def custom_values_url = "http://repos.sealingtech.com/cisco-c240-m5/suricata/values.yaml"
@@ -25,7 +26,7 @@ node {
 
   sh "env"
 
-  def container_tag = "gcr.io/edcop-public/$user_id-suricata"
+  def container_tag = "gcr.io/edcop-public/$user_id-$tool_name"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
@@ -47,16 +48,16 @@ node {
        * First, the incremental build number from Jenkins
        * Second, the 'latest' tag.
        * Pushing multiple tags is cheap, as all the layers are reused. */
-      docker.withRegistry('https://gcr.io/edcop-public/', 'gcr:edcop-public') {
+      docker.withRegistry('https://gcr.io/edcop-public/', 'gcr:edcop-dev') {
           app.push("$env.BUILD_ID")
       }
   }
 
   stage('helm lint') {
-      sh 'helm lint suricata' 
+      sh 'helm lint $tool_name' 
   }
 
   stage('helm deploy') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url suricata"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
 }
