@@ -54,7 +54,7 @@ node {
   }
 
   stage('helm lint') {
-      sh 'helm lint $tool_name' 
+      sh "helm lint $tool_name"
   }
 
   stage('helm deploy') {
