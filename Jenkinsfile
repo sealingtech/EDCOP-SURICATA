@@ -62,9 +62,9 @@ node {
   }
 
   stage('Running Traffic)' {
-    sshagent (credentials: ['deploy-dev']) {
+    sshagent (credentials: ['jenkins']) {
       //sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
-      sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 cd /trex"
+      //sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 cd /trex"
     }
   }
 }
