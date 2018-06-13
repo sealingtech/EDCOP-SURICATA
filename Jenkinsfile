@@ -60,4 +60,10 @@ node {
   stage('helm deploy') {
       sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
+
+  stage('Running Traffic)' {
+    sshagent (credentials: ['deploy-dev']) {
+      sh 'ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 "cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60" '
+    }
+  }
 }
