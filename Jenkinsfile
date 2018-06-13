@@ -78,7 +78,7 @@ node {
 
 
   stage('Verifying engine started on first pod') {
-    def first pod=sh(returnStdout: true, script: "kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk {'print " + '$' + "1'} | head -1")
+    def first pod=sh(returnStdout: true, script: "kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk {'print \\$1'} | head -1")
 
     kubectl logs $first_pod -c suricata | grep 'engine started'
   }
