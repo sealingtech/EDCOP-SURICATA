@@ -26,7 +26,7 @@ node {
 
   sh "env"
 
-  def container_tag = "gcr.io/edcop-public/$user_id-$tool_name"
+  def container_tag = "gcr.io/edcop-dev/$user_id-$tool_name"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
@@ -58,6 +58,6 @@ node {
   }
 
   stage('helm deploy') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url $tool_name"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
 }
