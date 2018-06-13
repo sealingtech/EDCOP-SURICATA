@@ -26,7 +26,7 @@ node {
 
   sh "env"
 
-  def container_tag = "gcr.io/edcop-public/$user_id-$tool_name"
+  def container_tag = "gcr.io/edcop-dev/$user_id-$tool_name"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
@@ -48,7 +48,7 @@ node {
        * First, the incremental build number from Jenkins
        * Second, the 'latest' tag.
        * Pushing multiple tags is cheap, as all the layers are reused. */
-      docker.withRegistry('https://gcr.io/edcop-public/', 'gcr:edcop-dev') {
+      docker.withRegistry('https://gcr.io/edcop-dev/', 'gcr:edcop-dev') {
           app.push("$env.BUILD_ID")
       }
   }
@@ -58,6 +58,6 @@ node {
   }
 
   stage('helm deploy') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' -f $custom_values_url $tool_name"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
 }
