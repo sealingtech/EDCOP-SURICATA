@@ -62,7 +62,7 @@ node {
   }
 
   stage('sleeping 4 minutes') {
-    sleep(5)
+    sleep(240)
   }
 
   stage('Verifying running pods') {
