@@ -26,7 +26,7 @@ node {
 
   sh "env"
 
-  def container_tag = "gcr.io/edcop-public/$user_id-$tool_name"
+  def container_tag = "gcr.io/edcop-dev/$user_id-$tool_name"
 
   stage('Clone repository') {
       /* Let's make sure we have the repository cloned to our workspace */
