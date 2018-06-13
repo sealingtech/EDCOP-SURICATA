@@ -62,21 +62,26 @@ node {
   }
 
   stage('sleeping 4 minutes') {
-    sleep(240)
+    sleep(2)
   }
 
   stage('Verifying running pods') {
-    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}")
-    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}")
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
 
-    if($number_ready==$number_scheduled) {
+    if(${number_ready}==${number_scheduled}) {
       println("Pods are running")
     } else {
       error("Some or all Pods failed")
     }
   }
 
-  
+
+  stage('Verifying engine started on first pod') {
+    def first pod=sh(returnStdout: true, script: "kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk {'print $1'} | head -1")
+
+    kubectl logs $first_pod -c suricata | grep 'engine started'
+  }
 
   stage('running traffic') {
       sshagent(credentials: ['jenkins']) {
