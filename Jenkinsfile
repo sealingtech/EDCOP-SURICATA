@@ -86,7 +86,7 @@ node {
     def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
     def first_pod=sh(returnStdout: true, script: command)
 
-    def command="kubectl logs -c suricata $first_pod | grep \'engine started\'"
+    def command="kubectl logs -c suricata $first_pod | grep started"
 
     sh(command)
   }
