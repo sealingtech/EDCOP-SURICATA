@@ -33,7 +33,6 @@ node {
       checkout scm
   }
 
-/*
   stage('Build image') {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
@@ -97,7 +96,7 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
       }
   }
-*/
+
 
 //-------Starting Passive------------
   stage('deleting inline suricata') {
