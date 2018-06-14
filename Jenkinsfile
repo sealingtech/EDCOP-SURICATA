@@ -66,14 +66,15 @@ node {
   }
 
   stage('Verifying running pods') {
-    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
-    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim().toInteger()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim().toInteger()
 
     println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
 
     if($number_ready==$number_scheduled) {
       println("Pods are running")
     } else {
+      println("Some or all Pods failed")
       error("Some or all Pods failed")
     }
   }
