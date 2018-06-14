@@ -87,6 +87,7 @@ node {
     def first_pod=sh(returnStdout: true, script: command)
 
     def command="kubectl logs -c suricata $first_pod | grep started"
+    println(command)
 
     sh(command)
   }
