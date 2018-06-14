@@ -84,7 +84,7 @@ node {
 
   stage('Verifying engine started on first pod') {
     def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
-    def first_pod=sh(returnStdout: true, script: $command)
+    def first_pod=sh(returnStdout: true, script: command)
 
     sh("kubectl logs $first_pod -c suricata | grep 'engine started'")
   }
@@ -122,7 +122,7 @@ node {
 
   stage('Verifying engine started on first pod-passive') {
     def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
-    def first_pod=sh(returnStdout: true, script: $command)
+    def first_pod=sh(returnStdout: true, script: command)
 
     sh("kubectl logs $first_pod -c suricata | grep 'engine started'")
   }
