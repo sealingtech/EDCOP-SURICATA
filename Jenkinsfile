@@ -104,7 +104,7 @@ node {
   }
 
   stage('helm deploy-passive') {
-      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --set networks.net1=passive --set suricataConfig.inline=false --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --set networks.net1=passive --set suricataConfig.inline=false --name='$user_id-$tool_name-passive-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
 
   stage('sleeping 4 minutes') {
@@ -112,8 +112,8 @@ node {
   }
 
   stage('Verifying running pods-passive') {
-    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
-    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
 
     if($number_ready==$number_scheduled) {
       println("Pods are running")
@@ -124,7 +124,7 @@ node {
 
 
   stage('Verifying engine started on first pod-passive') {
-    def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
+    def command="kubectl get pods  | grep $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
     def first_pod=sh(returnStdout: true, script: command)
 
     def command2="kubectl logs -c suricata $first_pod | grep started"
