@@ -112,19 +112,22 @@ node {
   }
 
   stage('Verifying running pods-passive') {
-    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
-    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
 
-    if($number_ready==$number_scheduled) {
+    println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
+
+    if(number_ready==number_scheduled) {
       println("Pods are running")
     } else {
+      println("Some or all Pods failed")
       error("Some or all Pods failed")
     }
   }
 
 
   stage('Verifying engine started on first pod-passive') {
-    def command="kubectl get pods  | grep $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
+    def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
     def first_pod=sh(returnStdout: true, script: command)
 
     def command2="kubectl logs -c suricata $first_pod | grep started"
