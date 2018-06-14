@@ -142,7 +142,7 @@ node {
       }
   }   
 
-  stage('deleting inline suricata') {
+  stage('deleting passive suricata') {
     sh "helm delete $user_id-$tool_name-passive-$env.BUILD_ID"
   }
 
