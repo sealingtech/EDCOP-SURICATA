@@ -112,8 +112,8 @@ node {
   }
 
   stage('Verifying running pods-passive') {
-    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
-    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
 
     println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
 
@@ -127,7 +127,7 @@ node {
 
 
   stage('Verifying engine started on first pod-passive') {
-    def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
+    def command="kubectl get pods  | grep $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
     def first_pod=sh(returnStdout: true, script: command)
 
     def command2="kubectl logs -c suricata $first_pod | grep started"
@@ -141,5 +141,9 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
       }
   }   
+
+  stage('deleting inline suricata') {
+    sh "helm delete $user_id-$tool_name-passive-$env.BUILD_ID"
+  }
 
 }
