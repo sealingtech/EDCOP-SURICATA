@@ -57,7 +57,7 @@ node {
       sh "helm lint $tool_name"
   }
 
-  stage('helm deploy') {
+  stage('helm deploy suricata inline') {
       sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
 
@@ -68,6 +68,8 @@ node {
   stage('Verifying running pods') {
     def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
     def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+
+    println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
 
     if($number_ready==$number_scheduled) {
       println("Pods are running")
@@ -89,4 +91,9 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
       }
   }
+
+  stage('deleting inline suricata') {
+    sh "helm delete $user_id-$tool_name-$env.BUILD_ID"
+  }
+
 }
