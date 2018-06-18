@@ -50,7 +50,7 @@ RUN yum -y update && \
 
 RUN yum -y install wget
 RUN useradd -s /sbin/nologin suri
-RUN chown -R /var/run/suricata/ suri:suri
+RUN chown -R suri:suri /var/run/suricata/
         
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
