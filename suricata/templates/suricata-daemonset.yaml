@@ -31,6 +31,9 @@ spec:
       ]'
       {{ end }}
     spec:
+      securityContext:
+        runAsUser: 2001
+        fsGroup: 2001
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
