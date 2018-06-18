@@ -49,6 +49,7 @@ RUN yum -y update && \
         yum -y clean all
 
 RUN yum -y install wget
+RUN useradd suri
         
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh

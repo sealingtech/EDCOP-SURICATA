@@ -840,9 +840,9 @@ data:
     ##
 
     # Run suricata as user and group.
-    #run-as:
-    #  user: suri
-    #  group: suri
+    run-as:
+      user: suri
+      group: suri
 
     # Some logging module will use that name in event as identifier. The default
     # value is the hostname
