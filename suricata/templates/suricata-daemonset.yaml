@@ -44,6 +44,7 @@ spec:
               add:
                 - NET_ADMIN
                 - SYS_NICE #Needed for CPU pinning
+                - NET_RAW
         volumeMounts:
           - mountPath: /etc/suricata
             name: suricata-config
