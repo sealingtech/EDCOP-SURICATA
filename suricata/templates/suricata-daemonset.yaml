@@ -38,9 +38,9 @@ spec:
         command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
+          runAsUser: 2000
+          fsGroup: 2000
           capabilities:
-              runAsUser: 2000
-              fsGroup: 2000
               add:
                 - NET_ADMIN
                 - SYS_NICE #Needed for CPU pinning
