@@ -39,6 +39,8 @@ spec:
         tty: true
         securityContext:
           capabilities:
+              runAsUser: 2000
+              fsGroup: 2000
               add:
                 - NET_ADMIN
                 - SYS_NICE #Needed for CPU pinning
