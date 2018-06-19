@@ -38,8 +38,6 @@ spec:
         command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
-          runAsUser: 2000
-          fsGroup: 2000
           capabilities:
               add:
                 - NET_ADMIN
