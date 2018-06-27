@@ -13,7 +13,7 @@ networks:
   net2: 'inline-2'
 #NodeSelector can be used when it is desired to over-ride the default sensor.  For example, if it was desired to specify passive and inline sections of the network.
 nodeSelector:
-  nodetype: 'worker'
+  label: sensor
 deploymentOptions:
   #The three options for deployment are standalone, cluster and external.  Please see the documentation on deploy options for definitions and special considerations.
   deployment: 'standalone'
