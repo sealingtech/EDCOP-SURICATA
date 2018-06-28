@@ -31,6 +31,26 @@ spec:
       ]'
       {{ end }}
     spec:
+      initContainers:
+      - name: verifynode
+        image: gcr.io/edcop-public/runner:2
+        volumeMounts:
+          - mountPath: /var/lock
+            name: lock
+        - name: STARTUP_SCRIPT
+          value: |
+            #!/bin/bash
+
+            while true; do
+              ready=$(lsof /var/lock/sensor-ready | wc -l)
+              if [[ $ready = "0" ]];then
+                echo "Node not ready, try again in 10 seconds";
+                sleep 10;
+              else
+                echo "Node Ready, starting sensor";
+                exit 0;
+              fi
+            done            
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
@@ -95,6 +115,9 @@ spec:
       - name: suricata-config
         configMap:
           name: {{ template "suricata.fullname" . }}-config
+      - name: lock
+        hostPath:
+          path: /var/lock
       {{ if eq .Values.deploymentOptions.deployment "standalone"  }}
       - name: logstash-suricata-config
         configMap:
@@ -103,6 +126,7 @@ spec:
         configMap:
           name: logstash-{{ template "suricata.fullname" . }}-pipeline
       {{ end }}
+
       
       restartPolicy: Always
       dnsPolicy: ClusterFirst
