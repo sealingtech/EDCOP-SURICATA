@@ -4,7 +4,7 @@ images:
   suricata: gcr.io/edcop-public/suricata:2
   logstash: docker.elastic.co/logstash/logstash:6.2.4
   redis: redis:4.0.9
-  runner: gcr.io/edcop-public/runner:6
+  runner: gcr.io/edcop-public/runner:7
 networks:
   # Overlay is the name of the default cni network
   overlay: 'calico'
