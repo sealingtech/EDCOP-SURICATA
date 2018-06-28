@@ -40,7 +40,7 @@ spec:
         env:
         - name: STARTUP_SCRIPT
           value: |
-            #!/bin/bash
+            #! /bin/bash
 
             while true; do
               ready=$(lsof /var/lock/sensor-ready | wc -l)
