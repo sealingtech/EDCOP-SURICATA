@@ -33,7 +33,7 @@ spec:
     spec:
       initContainers:
       - name: verifynode
-        image: gcr.io/edcop-public/runner:2
+        image: {{ .Values.images.runner }}
         volumeMounts:
           - mountPath: /var/lock
             name: lock
