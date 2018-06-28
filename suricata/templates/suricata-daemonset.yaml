@@ -37,6 +37,7 @@ spec:
         volumeMounts:
           - mountPath: /var/lock
             name: lock
+        env:
         - name: STARTUP_SCRIPT
           value: |
             #!/bin/bash
@@ -50,7 +51,7 @@ spec:
                 echo "Node Ready, starting sensor";
                 exit 0;
               fi
-            done            
+            done    
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
