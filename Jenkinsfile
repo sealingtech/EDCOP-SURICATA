@@ -33,7 +33,6 @@ node {
       checkout scm
   }
 
-
   stage('Build image') {
       /* This builds the actual image; synonymous to
        * docker build on the command line */
@@ -57,7 +56,94 @@ node {
       sh "helm lint $tool_name"
   }
 
-  stage('helm deploy') {
+  stage('helm deploy suricata inline') {
       sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --name='$user_id-$tool_name-$env.BUILD_ID' -f $custom_values_url $tool_name"
   }
+
+  stage('sleeping 4 minutes') {
+    sleep(240)
+  }
+
+  stage('Verifying running pods') {
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+
+    println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
+
+    if(number_ready==number_scheduled) {
+      println("Pods are running")
+    } else {
+      println("Some or all Pods failed")
+      error("Some or all Pods failed")
+    }
+  }
+
+
+
+
+  stage('Verifying engine started on first pod') {
+    def command="kubectl get pods  | grep $user_id-$tool_name-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
+    def first_pod=sh(returnStdout: true, script: command)
+
+    def command2="kubectl logs -c suricata $first_pod | grep started"
+    println(command2)
+
+    sh(command)
+  }
+
+  stage('running traffic') {
+      sshagent(credentials: ['jenkins']) {
+        sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
+      }
+  }
+
+
+//-------Starting Passive------------
+  stage('deleting inline suricata') {
+    sh "helm delete $user_id-$tool_name-$env.BUILD_ID"
+  }
+
+  stage('helm deploy-passive') {
+      sh "helm install --set $custom_image='$container_tag:$env.BUILD_ID' --set networks.net1=passive --set suricataConfig.inline=false --name='$user_id-$tool_name-passive-$env.BUILD_ID' -f $custom_values_url $tool_name"
+  }
+
+  stage('sleeping 4 minutes') {
+    sleep(240)
+  }
+
+  stage('Verifying running pods-passive') {
+    def number_ready=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.numberReady}").trim()
+    def number_scheduled=sh(returnStdout: true, script: "kubectl get ds $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name  -o jsonpath={.status.currentNumberScheduled}").trim()
+
+    println("Ready pods: $number_ready  Scheduled pods: $number_scheduled")
+
+    if(number_ready==number_scheduled) {
+      println("Pods are running")
+    } else {
+      println("Some or all Pods failed")
+      error("Some or all Pods failed")
+    }
+  }
+
+
+  stage('Verifying engine started on first pod-passive') {
+    def command="kubectl get pods  | grep $user_id-$tool_name-passive-$env.BUILD_ID-$tool_name | awk "+'{\'print $1\'}'+"| head -1"
+    def first_pod=sh(returnStdout: true, script: command)
+
+    def command2="kubectl logs -c suricata $first_pod | grep started"
+    println(command2)
+
+    sh(command)
+  }
+
+  stage('running traffic') {
+      sshagent(credentials: ['jenkins']) {
+        sh "ssh -o StrictHostKeyChecking=no -l jenkins 172.16.250.30 'cd /trex; sudo /trex/t-rex-64  -f /trex/cap2/cnn_dns.yaml -d 60'"
+      }
+  }   
+
+  stage('deleting passive suricata') {
+    sh "helm delete $user_id-$tool_name-passive-$env.BUILD_ID"
+  }
+
 }
