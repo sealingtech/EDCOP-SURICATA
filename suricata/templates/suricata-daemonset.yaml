@@ -107,4 +107,4 @@ spec:
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       nodeSelector:
-        nodetype: worker
+        {{ .Values.nodeSelector.label }} : "true"
