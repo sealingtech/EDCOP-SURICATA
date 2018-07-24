@@ -100,7 +100,7 @@ spec:
       - name: suricata-config
         configMap:
           name: {{ template "suricata.fullname" . }}-config
-      - name: suricata-rules
+      - name: suricata-rules-pvc
         persistentVolumeClaim:
           claimName: {{ template "suricata.fullname" . }}-rules-pvc
       {{- if eq .Values.deploymentOptions.deployment "standalone"  }}
