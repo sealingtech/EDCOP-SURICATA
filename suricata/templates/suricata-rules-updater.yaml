@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "suricata.fullname" . }}-update
+  labels:
+    app: {{ template "suricata.name" . }}-update
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "suricata.name" . }}-update
+      annotations:
+        "helm.sh/hook": "pre-install"  # Run before all other services start
+        networks: '[
+        { "name": "{{  .Values.networks.overlay }}" }
+      ]'
+    spec:
+      containers:
+      - name: suricata-rules
+        image: {{ .Values.images.suricata }}
+        env:
+        - name: RULES_UPDATER
+          value: "true"
+        - name: CHART_PREFIX
+          value: {{ template "suricata.fullname" . }}
+        command: ["suricata-update"]    
+        volumeMounts:
+        #- name: suricata-update-conf
+        #  mountPath: /etc/suricata/update.yaml
+        #  subPath: update.yaml
+        - name: suricata-rules-pvc
+          mountPath: /var/lib/suricata/rules
+      volumes:
+      #- name: suricata-update-conf
+      #  configMap: 
+      #    name: {{ template "suricata.fullname" . }}-update-conf
+      - name: suricata-rules
+        persistentVolumeClaim:
+          claimName: {{ template "suricata.fullname" . }}-rules-pvc
+      restartPolicy: OnFailure 
+      dnsPolicy: ClusterFirst
+        
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "suricata.fullname" . }}-update
+  labels:
+    app: {{ template "suricata.name" . }}-update
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  schedule: "{{ .Values.suricataConfig.rulesUpdateSchedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      metadata:
+        labels:
+          app: {{ template "suricata.name" . }}-update
+        annotations:
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" }
+        ]'
+      spec:
+        serviceAccountName: {{ template "suricata.fullname" . }}
+        containers:
+        - name: suricata-update
+          image: {{ .Values.images.suricata }}
+          env:
+          - name: RULES_UPDATER
+            value: "true"
+          - name: CHART_PREFIX
+          value: {{ template "suricata.fullname" . }}
+          volumeMounts:
+          #- name: suricata-update-conf
+          #  mountPath: /etc/suricata/update.yaml
+          #  subPath: update.yaml
+          - name: suricata-rules-pvc
+            mountPath: /var/lib/suricata/rules
+        volumes:
+        #- name: suricata-update-conf
+        #  configMap: 
+        #    name: {{ template "suricata.fullname" . }}-update-conf
+        - name: suricata-rules
+          persistentVolumeClaim:
+            claimName: {{ template "suricata.fullname" . }}-rules-pvc
+        restartPolicy: OnFailure 
+        dnsPolicy: ClusterFirst
+    
