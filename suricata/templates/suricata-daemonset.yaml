@@ -38,7 +38,6 @@ spec:
       - name: suricata
         image: {{ .Values.images.suricata }}
         stdin: true
-        command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
           capabilities:

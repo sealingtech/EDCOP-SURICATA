@@ -65,8 +65,8 @@ spec:
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
-      metadata:
-        template:
+      template:
+        metadata:
           labels:
             app: {{ template "suricata.name" . }}-update
           annotations:

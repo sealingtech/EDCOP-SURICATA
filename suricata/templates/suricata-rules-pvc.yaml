@@ -9,6 +9,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
+  storageClassName: edcop-nfs
   resources:
     requests:
       storage: 5Gi
