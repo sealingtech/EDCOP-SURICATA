@@ -66,40 +66,41 @@ spec:
   jobTemplate:
     spec:
       metadata:
-        labels:
-          app: {{ template "suricata.name" . }}-update
-        annotations:
-          networks: '[
-          { "name": "{{  .Values.networks.overlay }}" }
-        ]'
-      spec:
-        serviceAccountName: {{ template "suricata.fullname" . }}
-        containers:
-        - name: suricata-update
-          image: {{ .Values.images.suricata }}
-          env:
-          - name: RULES_UPDATER
-            value: "true"
-          - name: CHART_PREFIX
-          value: {{ template "suricata.fullname" . }}
-          volumeMounts:
+        template:
+          labels:
+            app: {{ template "suricata.name" . }}-update
+          annotations:
+            networks: '[
+            { "name": "{{  .Values.networks.overlay }}" }
+          ]'
+        spec:
+          serviceAccountName: {{ template "suricata.fullname" . }}
+          containers:
+          - name: suricata-update
+            image: {{ .Values.images.suricata }}
+            env:
+            - name: RULES_UPDATER
+              value: "true"
+            - name: CHART_PREFIX
+              value: {{ template "suricata.fullname" . }}
+            volumeMounts:
+            #- name: suricata-update-conf
+            #  mountPath: /etc/suricata/update.yaml
+            #  subPath: update.yaml
+            - name: suricata-config
+              mountPath: /etc/suricata
+            - name: suricata-rules-pvc
+              mountPath: /var/lib/suricata/rules
+          volumes:
           #- name: suricata-update-conf
-          #  mountPath: /etc/suricata/update.yaml
-          #  subPath: update.yaml
-          - name: suricata-config
-            mountPath: /etc/suricata
+          #  configMap: 
+          #    name: {{ template "suricata.fullname" . }}-update-conf
           - name: suricata-rules-pvc
-            mountPath: /var/lib/suricata/rules
-        volumes:
-        #- name: suricata-update-conf
-        #  configMap: 
-        #    name: {{ template "suricata.fullname" . }}-update-conf
-        - name: suricata-rules-pvc
-          persistentVolumeClaim:
-            claimName: {{ template "suricata.fullname" . }}-rules-pvc
-        - name: suricata-config
-          configMap:
-            name: {{ template "suricata.fullname" . }}-config
-        restartPolicy: OnFailure 
-        dnsPolicy: ClusterFirst
+            persistentVolumeClaim:
+              claimName: {{ template "suricata.fullname" . }}-rules-pvc
+          - name: suricata-config
+            configMap:
+              name: {{ template "suricata.fullname" . }}-config
+          restartPolicy: OnFailure 
+          dnsPolicy: ClusterFirst
     
