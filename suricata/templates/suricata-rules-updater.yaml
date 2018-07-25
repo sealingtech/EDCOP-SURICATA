@@ -22,7 +22,7 @@ spec:
       containers:
       - name: suricata-rules
         image: {{ .Values.images.suricata }}
-        commnd: [ "/update-entrypoint.sh" ]
+        command: [ "/update-entrypoint.sh" ]
         env:
         - name: CHART_PREFIX
           value: {{ template "suricata.fullname" . }}
@@ -77,7 +77,7 @@ spec:
           containers:
           - name: suricata-update
             image: {{ .Values.images.suricata }}
-            commnd: [ "/update-entrypoint.sh" ]
+            command: [ "/update-entrypoint.sh" ]
             env:
             - name: CHART_PREFIX
               value: {{ template "suricata.fullname" . }}
