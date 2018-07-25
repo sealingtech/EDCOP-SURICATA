@@ -21,9 +21,8 @@ spec:
       containers:
       - name: suricata-rules
         image: {{ .Values.images.suricata }}
+        commnd: [ "/update-entrypoint.sh" ]
         env:
-        - name: RULES_UPDATER
-          value: "true"
         - name: CHART_PREFIX
           value: {{ template "suricata.fullname" . }}
         command: ["suricata-update"]    
@@ -41,7 +40,7 @@ spec:
       #    name: {{ template "suricata.fullname" . }}-update-conf
       - name: suricata-config
         configMap:
-          name: {{ template "suricata.fullname" . }}-config
+          name: {{ template "suricata.fullname" . }}-update-config
       - name: suricata-rules-pvc
         persistentVolumeClaim:
           claimName: {{ template "suricata.fullname" . }}-rules-pvc
@@ -78,9 +77,8 @@ spec:
           containers:
           - name: suricata-update
             image: {{ .Values.images.suricata }}
+            commnd: [ "/update-entrypoint.sh" ]
             env:
-            - name: RULES_UPDATER
-              value: "true"
             - name: CHART_PREFIX
               value: {{ template "suricata.fullname" . }}
             volumeMounts:
@@ -100,7 +98,7 @@ spec:
               claimName: {{ template "suricata.fullname" . }}-rules-pvc
           - name: suricata-config
             configMap:
-              name: {{ template "suricata.fullname" . }}-config
+              name: {{ template "suricata.fullname" . }}-update-config
           restartPolicy: OnFailure 
           dnsPolicy: ClusterFirst
     

@@ -37,6 +37,7 @@ spec:
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
+        commnd: [ "/suricata-entrypoint.sh" ]
         stdin: true
         tty: true
         securityContext:
