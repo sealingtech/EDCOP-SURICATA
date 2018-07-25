@@ -18,6 +18,7 @@ spec:
         { "name": "{{  .Values.networks.overlay }}" }
       ]'
     spec:
+      serviceAccountName: {{ template "suricata.fullname" . }}
       containers:
       - name: suricata-rules
         image: {{ .Values.images.suricata }}
@@ -25,7 +26,6 @@ spec:
         env:
         - name: CHART_PREFIX
           value: {{ template "suricata.fullname" . }}
-        command: ["suricata-update"]    
         volumeMounts:
         #- name: suricata-update-conf
         #  mountPath: /etc/suricata/update.yaml
