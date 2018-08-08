@@ -48,7 +48,7 @@ suricataConfig:
   #These limit the number of CPU cores and memory the sensor can use.
   limits:
     cpu: 2
-    memory: 4G
+    memory: 2G
 #Logstash values will be ignored if standalone is set to true as no logstash will be built.
 logstashConfig:
   #Limits the number of threads that will be used by Logstash
@@ -56,8 +56,8 @@ logstashConfig:
   #Configures the batch count that Logstash will process at a time.
   batchCount: 250
   #Sets the initial and max JVM heap that will be allocated, generally these two values should be the same.
-  initialJvmHeap: 4g
-  maxJvmHeap: 4g
+  initialJvmHeap: 1g
+  maxJvmHeap: 1g
   #Sets the number of workers for pulling Redis events
   pipelineOutputWorkers: 2 
   #Sets the amount of events grabbed from Redis at one time.
@@ -67,7 +67,7 @@ logstashConfig:
     memory: 64Mi 
   limits:
     cpu: 2
-    memory: 8G
+    memory: 2G
 #These values will be ignored if standalone is set to true as Redis will not be built
 redisConfig:
   requests:
@@ -76,4 +76,4 @@ redisConfig:
   #limits the CPU and Memory of Redis.
   limits:
     cpu: 2
-    memory: 8G
+    memory: 1G
