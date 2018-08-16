@@ -63,20 +63,20 @@ inline-2	1d
  
 ## Node Selector
 
-This value tells Kubernetes which hosts the daemonset should be deployed to by using labels given to the hosts. Hosts without the defined label will not receive pods. 
+This value tells Kubernetes which hosts the daemonset should be deployed to by using labels given to the hosts. Hosts without the defined label will not receive pods. Suricata will only deploy to nodes that have been labeled 'sensor=true'
  
 ```
 nodeSelector:
-  nodetype: worker
+    label: sensor
 ```
  
 To find out what labels your hosts have, please use the following:
 ```
 # kubectl get nodes --show-labels
 NAME		STATUS		ROLES		AGE		VERSION		LABELS
-master 		Ready		master		1d		v1.9.1		...,nodetype=master
-minion-1	Ready		<none>		1d		v1.9.1		...,nodetype=minion
-minion-2	Ready		<none>		1d		v1.9.1		...,nodetype=minion
+master 		Ready		master		1d		v1.9.1		...,infrastructure=true
+minion-1	Ready		<none>		1d		v1.9.1		...,sensor=true
+minion-2	Ready		<none>		1d		v1.9.1		...,sensor=true
 ```
 
 ## Deployment Options
