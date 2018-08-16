@@ -1,7 +1,7 @@
 # EDCOP Suricata Chart values
 images:
   # Repositories to pull images from
-  suricata: gcr.io/edcop-public/suricata:2
+  suricata: miked235/suricata
   logstash: docker.elastic.co/logstash/logstash:6.3.0
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
