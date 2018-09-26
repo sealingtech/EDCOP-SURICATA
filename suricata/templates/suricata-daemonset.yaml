@@ -34,8 +34,13 @@ spec:
         env:
         - name: STARTUP_SCRIPT
           value: |
-            #! /bin/bash
+            #!/bin/bash
+            set -e
             sleep 10
+            if [ ! -f /sys/class/net/net0/operstate ]; then
+            echo "Network interface 'net0' not found, exiting..."
+            exit 1
+            fi
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
