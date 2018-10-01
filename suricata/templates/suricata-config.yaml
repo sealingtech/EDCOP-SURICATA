@@ -515,7 +515,7 @@ data:
     ##
 
     # Linux high speed capture support
-    {{ if.Values.suricataCOnfig.useHostNetworking }}
+    {{ if.Values.suricataConfig.useHostNetworking }}
       {{ if .Values.suricataConfig.inline }}
       af-packet:
         - interface: {{  .Values.networks.hostNetworkingInterface1 }}
