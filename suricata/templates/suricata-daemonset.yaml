@@ -17,10 +17,20 @@ spec:
       name: {{ template "suricata.name" . }}
       labels:
         app: suricata
-      {{ if .Values.networks.useHostNetworking }}
+      annotations:
+      {{ if .Values.suricataConfig.useHostNetworking }}
+        {{ if .Values.suricataConfig.inline }}
           networks: '[
-          { "name": "{{  .Values.networks.overlay }}" }
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.hostNetworkingInterface1 }}" },
+          { "name": "{{  .Values.networks.hostNetworkingInterface2 }}" }
         ]'
+        {{ else }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.hostNetworkingInterface1 }}" }
+        ]'
+        {{ end }}
       {{ else }}
         {{ if .Values.suricataConfig.inline }}
           networks: '[
@@ -36,7 +46,7 @@ spec:
         {{ end }}
       {{ end }}
     spec:
-    {{ if .Values.networks.useHostNetworking }}hostNetwork: true{{ end }}
+      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
@@ -45,6 +55,12 @@ spec:
           value: |
             #! /bin/bash
             sleep 10
+        {{ if.Values.suricataConfig.useHostNetworking }}
+        - name: INTERFACE1
+          value: {{ .Values.networks.hostNetwokringInterface1 }}
+        - name: INTERFACE2
+          value: {{ .Values.networks.hostNetworkingInterface2 }}
+        {{ end }}
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
@@ -118,7 +134,6 @@ spec:
           name: logstash-{{ template "suricata.fullname" . }}-pipeline
       {{ end }}
 
-      
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       nodeSelector:
