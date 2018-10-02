@@ -17,23 +17,23 @@ spec:
       name: {{ template "suricata.name" . }}
       labels:
         app: suricata
-      annotations:        
-      networks: '[
       {{ if .Values.networks.useHostNetworking }}
-        { "name": "{{  .Values.networks.overlay }}" },    
-      ]'
-      {{ end }}
-      {{ if .Values.suricataConfig.inline }}
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
-        { "name": "{{  .Values.networks.net1 }}" },
-        { "name": "{{  .Values.networks.net2 }}" }
-      ]'
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" }
+        ]'
       {{ else }}
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
-        { "name": "{{  .Values.networks.net1 }}" }
-      ]'
+        {{ if .Values.suricataConfig.inline }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" },
+          { "name": "{{  .Values.networks.net2 }}" }
+        ]'
+        {{ else }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" }
+        ]'
+        {{ end }}
       {{ end }}
     spec:
     {{ if .Values.networks.useHostNetworking }}hostNetwork: true{{ end }}
