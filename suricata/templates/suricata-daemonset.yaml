@@ -19,18 +19,9 @@ spec:
         app: suricata
       annotations:
       {{ if .Values.suricataConfig.useHostNetworking }}
-        {{ if .Values.suricataConfig.inline }}
           networks: '[
           { "name": "{{  .Values.networks.overlay }}" },
-          { "name": "{{  .Values.networks.hostNetworkingInterface1 }}" },
-          { "name": "{{  .Values.networks.hostNetworkingInterface2 }}" }
         ]'
-        {{ else }}
-          networks: '[
-          { "name": "{{  .Values.networks.overlay }}" },
-          { "name": "{{  .Values.networks.hostNetworkingInterface1 }}" }
-        ]'
-        {{ end }}
       {{ else }}
         {{ if .Values.suricataConfig.inline }}
           networks: '[
