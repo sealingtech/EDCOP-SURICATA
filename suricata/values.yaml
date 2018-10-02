@@ -26,7 +26,7 @@ deploymentOptions:
     nodePort: 30029
 suricataConfig:
   #useHostNetworking If this option is set to true, the container will see all physical interfaces on the physical host it resides.  This has some security issues but can be useful in some situations. 
-  useHostNeworking: false
+  useHostNetworking: false
   #If inline is set to true the Suricata pod will have three network interfaces, and will be set to take layer 2 traffic in and output it to the other interface as well as connected to the overlay network.  If the option is set to false then Suricata will have two interfaces, one for the passive and the other for the network.
   inline: true 
   #Specifies internal networks that will be monitored.  This sets the direction of rules.
