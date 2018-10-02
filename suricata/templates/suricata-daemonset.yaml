@@ -36,6 +36,7 @@ spec:
       ]'
       {{ end }}
     spec:
+    {{ if .Values.networks.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
