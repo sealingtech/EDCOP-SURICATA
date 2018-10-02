@@ -18,6 +18,9 @@ spec:
       labels:
         app: suricata
       annotations:
+      {{ if .Values.networks.useHostNetworking }}
+        { "name": "{{  .Values.networks.overlay }}" },    
+      ]'
       {{ if .Values.suricataConfig.inline }}
         networks: '[
         { "name": "{{  .Values.networks.overlay }}" },
