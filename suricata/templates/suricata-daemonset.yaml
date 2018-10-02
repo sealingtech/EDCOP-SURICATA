@@ -17,10 +17,12 @@ spec:
       name: {{ template "suricata.name" . }}
       labels:
         app: suricata
-      annotations:
+      annotations:        
+      networks: '[
       {{ if .Values.networks.useHostNetworking }}
         { "name": "{{  .Values.networks.overlay }}" },    
       ]'
+      {{ end }}
       {{ if .Values.suricataConfig.inline }}
         networks: '[
         { "name": "{{  .Values.networks.overlay }}" },
