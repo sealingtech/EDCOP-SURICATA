@@ -48,6 +48,7 @@ spec:
     spec:
       {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
+      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       - name: verifynode
         image: {{ .Values.images.runner }}
         env:
@@ -62,6 +63,7 @@ spec:
           value: {{ .Values.networks.hostNetworkingInterface2 }}
         {{ end }}
       containers:
+      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       - name: suricata
         image: {{ .Values.images.suricata }}
         stdin: true
