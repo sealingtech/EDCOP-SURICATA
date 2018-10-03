@@ -517,7 +517,7 @@ data:
     # Linux high speed capture support
     {{ if.Values.suricataConfig.useHostNetworking }}
       {{ if .Values.suricataConfig.inline }}
-      af-packet:
+    af-packet:
         - interface: {{  .Values.networks.hostNetworkingInterface1 }}
           threads: {{  .Values.suricataConfig.net0Threads }}
           defrag: no
@@ -539,7 +539,7 @@ data:
           use-mmap: yes
           tpacket-v3: no
       {{ else }}
-      af-packet:
+    af-packet:
         - interface: {{  .Values.networks.hostNetworkingInterface1 }}
           threads: {{  .Values.suricataConfig.net0Threads }}
           defrag: yes
@@ -559,7 +559,7 @@ data:
       {{ end }}
     {{ else }}
       {{ if .Values.suricataConfig.inline }}    
-      af-packet:
+    af-packet:
         - interface: net0
           threads: {{  .Values.suricataConfig.net0Threads }}
           defrag: no
@@ -581,7 +581,7 @@ data:
           use-mmap: yes
           tpacket-v3: no
       {{ else }}
-      af-packet:
+    af-packet:
         - interface: net0
           threads: {{  .Values.suricataConfig.net0Threads }}
           defrag: yes
