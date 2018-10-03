@@ -46,12 +46,6 @@ spec:
           value: |
             #! /bin/bash
             sleep 10
-        {{ if.Values.suricataConfig.useHostNetworking }}
-        - name: INTERFACE1
-          value: {{ .Values.networks.hostNetworkingInterface1 }}
-        - name: INTERFACE2
-          value: {{ .Values.networks.hostNetworkingInterface2 }}
-        {{ end }}
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
