@@ -36,12 +36,23 @@ images:
 
 Suricata uses 2 or 3 interfaces depending on whether it is in passive or inline mode. If you choose passive mode, net2 will be ignored and net1 will be the name of the passive interface.
 By default, these interfaces are named *calico*, *passive*, *inline-1*, and *inline-2*.
+When useHostNetworking is set to true these interfaces are named *calico*, *hostNetworkingInterface1*, and *hostNetworkingInterface2*.
+
+useHostNetworking is used in situations where container networking is insufficient (such as the lack of SR-IOV).  This allows the container to see all physical interfaces of the nodes.  This has some security concerns due to the fact that Suricata now have access to all physical networking.  When useHostNetworking is set, specify hostNetworkingInterface to match the physical interface of the nodes being deployed to. If using passive mode only *hostNetworkingInterface1* will be used. If using inline then both *hostNetworkingInterface1* and *hostNetworkingInterface2* will be used. Again this must match the interface name on the physical node to which it will be deployed. When useHostNetworking is specified, the container will still be joined to the Calico network, but will ignore passive, inline-1, and inline-2. 
 
 ```
 networks:
   overlay: calico
   net1: passive
   net2: 
+```
+
+```
+networks:
+  overlay: calico
+  useHostNetworking: false
+  hostNetworkingInterface1: eth0 #change this to physical interface name
+  hostNetworkingInterface2: eth1 #change this to physical interface name
 ```
 
 ```
