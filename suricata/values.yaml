@@ -29,6 +29,8 @@ suricataConfig:
   useHostNetworking: false
   #If inline is set to true the Suricata pod will have three network interfaces, and will be set to take layer 2 traffic in and output it to the other interface as well as connected to the overlay network.  If the option is set to false then Suricata will have two interfaces, one for the passive and the other for the network.
   inline: true 
+  #If alertsOnly is set to true then Suricata will not record logs for http,dns,tls,smtp. This is common when using another tool that may already be recording this such as Bro.
+  alertsOnly: false
   #Specifies internal networks that will be monitored.  This sets the direction of rules.
   homeNet: '[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]'
   #These are the IPs outside of yout network.  This generally is set to !$HOME_NET which is everything not in the homeNet variable.
