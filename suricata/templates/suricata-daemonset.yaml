@@ -18,19 +18,26 @@ spec:
       labels:
         app: suricata
       annotations:
-      {{ if .Values.suricataConfig.inline }}
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
-        { "name": "{{  .Values.networks.net1 }}" },
-        { "name": "{{  .Values.networks.net2 }}" }
-      ]'
+      {{ if .Values.suricataConfig.useHostNetworking }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+        ]'
       {{ else }}
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
-        { "name": "{{  .Values.networks.net1 }}" }
-      ]'
+        {{ if .Values.suricataConfig.inline }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" },
+          { "name": "{{  .Values.networks.net2 }}" }
+        ]'
+        {{ else }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" }
+        ]'
+        {{ end }}
       {{ end }}
     spec:
+      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
@@ -46,6 +53,7 @@ spec:
         command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
+          privileged: true
           capabilities:
               add:
                 - NET_ADMIN
@@ -112,7 +120,6 @@ spec:
           name: logstash-{{ template "suricata.fullname" . }}-pipeline
       {{ end }}
 
-      
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       nodeSelector:
