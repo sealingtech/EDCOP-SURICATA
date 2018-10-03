@@ -105,6 +105,8 @@ deploymentOptions:
 
 ## Suricata Configuration
 
+alertsOnly when set to true in the values.yaml will disable logs for http,dns,tls,smtp. This is common when using another tool that may already be recording this such as Bro. It will still provide alerts.
+
 Suricata can be deployed in either inline or passive mode depending on how your cluster is setup. Inline mode will route traffic through the box for active threat detection and mitigation, while passive mode simply alerts you to potential threats. For an inline mode setup, the following is required:
  
  * An external traffic loadbalancer passing traffic through 2 interfaces on the host. 
