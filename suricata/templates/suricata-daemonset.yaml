@@ -53,6 +53,7 @@ spec:
         command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
+          privileged: true
           capabilities:
               add:
                 - NET_ADMIN
