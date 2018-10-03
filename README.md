@@ -52,7 +52,7 @@ networks:
   overlay: calico
   useHostNetworking: false
   hostNetworkingInterface1: eth0 #change this to physical interface name
-  hostNetworkingInterface2: eth1 #change this to physical interface name
+  hostNetworkingInterface2: eth1 #change this to physical interface name only used when inline
 ```
 
 ```
