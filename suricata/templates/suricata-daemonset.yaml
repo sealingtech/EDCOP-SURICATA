@@ -18,16 +18,26 @@ spec:
       labels:
         app: suricata
       annotations:
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
-        {{- if .Values.suricataConfig.inline }}
-        { "name": "{{  .Values.networks.net1 }}" },
-        { "name": "{{  .Values.networks.net2 }}" }
-        {{- else }}
-        { "name": "{{  .Values.networks.net1 }}" }
-        {{- end }}
-      ]'
+      {{ if .Values.suricataConfig.useHostNetworking }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+        ]'
+      {{ else }}
+        {{ if .Values.suricataConfig.inline }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" },
+          { "name": "{{  .Values.networks.net2 }}" }
+        ]'
+        {{ else }}
+          networks: '[
+          { "name": "{{  .Values.networks.overlay }}" },
+          { "name": "{{  .Values.networks.net1 }}" }
+        ]'
+        {{ end }}
+      {{ end }}
     spec:
+      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
@@ -48,6 +58,7 @@ spec:
         stdin: true
         tty: true
         securityContext:
+          privileged: true
           capabilities:
               add:
                 - NET_ADMIN
