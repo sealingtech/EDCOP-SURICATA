@@ -18,18 +18,15 @@ spec:
       labels:
         app: suricata
       annotations:
-      {{ if .Values.suricataConfig.inline }}
         networks: '[
         { "name": "{{  .Values.networks.overlay }}" },
+        {{- if .Values.suricataConfig.inline }}
         { "name": "{{  .Values.networks.net1 }}" },
         { "name": "{{  .Values.networks.net2 }}" }
-      ]'
-      {{ else }}
-        networks: '[
-        { "name": "{{  .Values.networks.overlay }}" },
+        {{- else }}
         { "name": "{{  .Values.networks.net1 }}" }
+        {{- end }}
       ]'
-      {{ end }}
     spec:
       initContainers:
       - name: verifynode
@@ -37,13 +34,18 @@ spec:
         env:
         - name: STARTUP_SCRIPT
           value: |
-            #! /bin/bash
+            #!/bin/bash
+            set -e
             sleep 10
+            if [ ! -f /sys/class/net/net0/operstate ]; then
+            echo "Network interface 'net0' not found, exiting..."
+            exit 1
+            fi
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
+        commnd: [ "/suricata-entrypoint.sh" ]
         stdin: true
-        command: ["docker-entrypoint.sh"]
         tty: true
         securityContext:
           capabilities:
@@ -56,6 +58,8 @@ spec:
             name: suricata-config
           - mountPath: /data/suricata
             name: suricata-logs
+          - mountPath: /var/lib/suricata/rules
+            name: suricata-rules-pvc
         resources:
           requests:
             cpu: "{{ .Values.suricataConfig.requests.cpu }}"
@@ -76,7 +80,7 @@ spec:
           limits:
             cpu: "{{ .Values.redisConfig.limits.cpu }}"
             memory: "{{ .Values.redisConfig.limits.memory }}"
-      {{ if eq .Values.deploymentOptions.deployment "standalone"  }}
+      {{- if eq .Values.deploymentOptions.deployment "standalone"  }}
       - name: logstash
         image: {{ .Values.images.logstash }}
         imagePullPolicy: Always
@@ -95,7 +99,7 @@ spec:
             name: logstash-suricata-pipeline
           - mountPath: /usr/share/logstash/config
             name: logstash-suricata-config
-      {{ end }}
+      {{- end }}
 
       volumes:
       - name: suricata-logs
@@ -103,16 +107,18 @@ spec:
       - name: suricata-config
         configMap:
           name: {{ template "suricata.fullname" . }}-config
-      {{ if eq .Values.deploymentOptions.deployment "standalone"  }}
+      - name: suricata-rules-pvc
+        persistentVolumeClaim:
+          claimName: {{ template "suricata.fullname" . }}-rules-pvc
+      {{- if eq .Values.deploymentOptions.deployment "standalone"  }}
       - name: logstash-suricata-config
         configMap:
           name: logstash-{{ template "suricata.fullname" . }}-config
       - name: logstash-suricata-pipeline
         configMap:
           name: logstash-{{ template "suricata.fullname" . }}-pipeline
-      {{ end }}
+      {{- end }}
 
-      
       restartPolicy: Always
       dnsPolicy: ClusterFirst
       nodeSelector:

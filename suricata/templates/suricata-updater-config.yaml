@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "suricata.fullname" . }}-config
+  name: {{ template "suricata.fullname" . }}-update-config
 data:
   suricata.yaml: |
     %YAML 1.1
@@ -89,7 +89,7 @@ data:
       # Extensible Event Format (nicknamed EVE) event log in JSON format
       - eve-log:
           enabled: yes
-          filetype: redis #regular|syslog|unix_dgram|unix_stream|redis
+          filetype: regular #regular|syslog|unix_dgram|unix_stream|redis
           filename: eve.json
           #prefix: "@cee: " # prefix to prepend to each log entry
           # the following are valid when type: syslog above
@@ -97,18 +97,18 @@ data:
           #facility: local5
           #level: Info ## possible levels: Emergency, Alert, Critical,
                        ## Error, Warning, Notice, Info, Debug
-          redis:
-            server: 127.0.0.1
-            port: 6379
-            mode: list ## possible values: list (default), channel
-            key: suricata ## key or channel to use (default to suricata)
+          #redis:
+          #  server: 127.0.0.1
+          #  port: 6379
+          #  mode: list ## possible values: list (default), channel
+          #  key: suricata ## key or channel to use (default to suricata)
           # Redis pipelining set up. This will enable to only do a query every
           # 'batch-size' events. This should lower the latency induced by network
           # connection at the cost of some memory. There is no flushing implemented
           # so this setting as to be reserved to high traffic suricata.
-            pipelining:
-              enabled: yes ## set enable to yes to enable query pipelining
-              batch-size: 10 ## number of entry to keep in buffer
+          #  pipelining:
+          #    enabled: yes ## set enable to yes to enable query pipelining
+          #    batch-size: 10 ## number of entry to keep in buffer
           types:
             - alert:
                 payload: yes             # enable dumping payload in Base64
