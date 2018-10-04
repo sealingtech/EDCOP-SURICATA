@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "suricata.fullname" . }}-config
+  name: {{ template "suricata.fullname" . }}-update-config
 data:
   suricata.yaml: |
     %YAML 1.1
@@ -89,7 +89,7 @@ data:
       # Extensible Event Format (nicknamed EVE) event log in JSON format
       - eve-log:
           enabled: yes
-          filetype: redis #regular|syslog|unix_dgram|unix_stream|redis
+          filetype: regular #regular|syslog|unix_dgram|unix_stream|redis
           filename: eve.json
           #prefix: "@cee: " # prefix to prepend to each log entry
           # the following are valid when type: syslog above
@@ -97,18 +97,18 @@ data:
           #facility: local5
           #level: Info ## possible levels: Emergency, Alert, Critical,
                        ## Error, Warning, Notice, Info, Debug
-          redis:
-            server: 127.0.0.1
-            port: 6379
-            mode: list ## possible values: list (default), channel
-            key: suricata ## key or channel to use (default to suricata)
+          #redis:
+          #  server: 127.0.0.1
+          #  port: 6379
+          #  mode: list ## possible values: list (default), channel
+          #  key: suricata ## key or channel to use (default to suricata)
           # Redis pipelining set up. This will enable to only do a query every
           # 'batch-size' events. This should lower the latency induced by network
           # connection at the cost of some memory. There is no flushing implemented
           # so this setting as to be reserved to high traffic suricata.
-            pipelining:
-              enabled: yes ## set enable to yes to enable query pipelining
-              batch-size: 10 ## number of entry to keep in buffer
+          #  pipelining:
+          #    enabled: yes ## set enable to yes to enable query pipelining
+          #    batch-size: 10 ## number of entry to keep in buffer
           types:
             - alert:
                 payload: yes             # enable dumping payload in Base64
@@ -143,34 +143,20 @@ data:
                   # one taken into consideration.
                   header: X-Forwarded-For
             - http:
-                {{ if .Values.suricataConfig.alertsOnly }} 
-                extended: no
-                {{ else }}
-                extended: yes
-                {{ end }}     
-                # enable this for extended logging information
+                extended: yes     # enable this for extended logging information
                 # custom allows additional http fields to be included in eve-log
                 # the example below adds three additional fields when uncommented
                 #custom: [Accept-Encoding, Accept-Language, Authorization]
             - dns:
                 # control logging of queries and answers
                 # default yes, no to disable
-                {{ if .Values.suricataConfig.alertsOnly }}
-                query: no     # enable logging of DNS queries
-                answer: no    # enable logging of DNS answers
-                {{ else }}
                 query: yes     # enable logging of DNS queries
                 answer: yes    # enable logging of DNS answers
-                {{ end }}
                 # control which RR types are logged
                 # all enabled if custom not specified
                 #custom: [a, aaaa, cname, mx, ns, ptr, txt]
             - tls:
-                {{ if .Values.suricataConfig.alertsOnly }}
-                extended: no     # enable this for extended logging information
-                {{ else }}
                 extended: yes     # enable this for extended logging information
-                {{ end }}                
             - files:
                 force-magic: no   # force logging magic on all logged files
                 # force logging of checksums, available hash functions are md5,
@@ -181,11 +167,7 @@ data:
                 flows: all       # start or all: 'start' logs only a single drop
             #                     # per flow direction. All logs each dropped pkt.
             - smtp:
-                {{ if .Values.suricataConfig.alertsOnly }}
-                extended: no # enable this for extended logging information
-                {{ else }}
-                extended: yes # enable this for extended logging information
-                {{ end }}
+                #extended: yes # enable this for extended logging information
                 # this includes: bcc, message-id, subject, x_mailer, user-agent
                 # custom fields logging from the list:
                 #  reply-to, bcc, message-id, subject, x-mailer, user-agent, received,
@@ -483,91 +465,47 @@ data:
     ##
 
     # Linux high speed capture support
-    {{ if.Values.suricataConfig.useHostNetworking }}
-      {{ if .Values.suricataConfig.inline }}
+    {{ if .Values.suricataConfig.inline }}
     af-packet:
-        - interface: {{  .Values.networks.hostNetworkingInterface1 }}
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: no
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: ips
-          copy-iface: {{  .Values.networks.hostNetworkingInterface2 }}
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-        - interface: {{  .Values.networks.hostNetworkingInterface2 }}
-          threads: {{  .Values.suricataConfig.net1Threads }} 
-          cluster-id: 97
-          defrag: no
-          cluster-type: cluster_flow
-          copy-mode: ips
-          copy-iface: {{  .Values.networks.hostNetworkingInterface1 }}
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-      {{ else }}
-    af-packet:
-        - interface: {{  .Values.networks.hostNetworkingInterface1 }}
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: yes
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: tap
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: yes
-        # Put default values here. These will be used for an interface that is not
-        # in the list above.
-        - interface: default
-          #threads: auto
-          #use-mmap: no
-          #rollover: yes
-          #tpacket-v3: yes
-      {{ end }}
+      - interface: net0
+        threads: {{  .Values.suricataConfig.net0Threads }}
+        defrag: no
+        cluster-type: cluster_flow
+        cluster-id: 98
+        copy-mode: ips
+        copy-iface: net1
+        buffer-size: 64535
+        use-mmap: yes
+        tpacket-v3: no
+      - interface: net1
+        threads: {{  .Values.suricataConfig.net1Threads }} 
+        cluster-id: 97
+        defrag: no
+        cluster-type: cluster_flow
+        copy-mode: ips
+        copy-iface: net0
+        buffer-size: 64535
+        use-mmap: yes
+        tpacket-v3: no
     {{ else }}
-      {{ if .Values.suricataConfig.inline }}    
     af-packet:
-        - interface: net0
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: no
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: ips
-          copy-iface: net1
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-        - interface: net1
-          threads: {{  .Values.suricataConfig.net1Threads }} 
-          cluster-id: 97
-          defrag: no
-          cluster-type: cluster_flow
-          copy-mode: ips
-          copy-iface: net0
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-      {{ else }}
-    af-packet:
-        - interface: net0
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: yes
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: tap
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: yes
-        # Put default values here. These will be used for an interface that is not
-        # in the list above.
-        - interface: default
-          #threads: auto
-          #use-mmap: no
-          #rollover: yes
-          #tpacket-v3: yes
-      {{ end }} 
-    {{ end }}   
+      - interface: net0
+        threads: {{  .Values.suricataConfig.net0Threads }}
+        defrag: yes
+        cluster-type: cluster_flow
+        cluster-id: 98
+        copy-mode: tap
+        buffer-size: 64535
+        use-mmap: yes
+        tpacket-v3: yes
+      # Put default values here. These will be used for an interface that is not
+      # in the list above.
+      - interface: default
+        #threads: auto
+        #use-mmap: no
+        #rollover: yes
+        #tpacket-v3: yes
+    {{ end }}
     # Cross platform libpcap capture support
     pcap:
       - interface: eth0
@@ -1798,3 +1736,5 @@ data:
     config classification: inappropriate-content,Inappropriate Content was Detected,1
     config classification: policy-violation,Potential Corporate Privacy Violation,1
     config classification: default-login-attempt,Attempt to Login By a Default Username and Password,2
+
+
