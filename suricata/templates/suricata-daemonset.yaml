@@ -18,7 +18,7 @@ spec:
       labels:
         app: suricata
       annotations:
-      {{ if .Values.suricataConfig.useHostNetworking }}
+      {{ if .Values.networks.useHostNetworking }}
           networks: '[
           { "name": "{{  .Values.networks.overlay }}" },
         ]'
@@ -37,7 +37,7 @@ spec:
         {{ end }}
       {{ end }}
     spec:
-      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
+      {{ if.Values.networks.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
