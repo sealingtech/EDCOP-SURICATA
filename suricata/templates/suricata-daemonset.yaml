@@ -63,7 +63,7 @@ spec:
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
-        commnd: [ "bash", "-c", "cp -R /tmp/suricata /etc/suricata/ && /suricata-entrypoint.sh" ]
+        commnd: [ "bash", "-c", "cp /tmp/suricata/* /etc/suricata/ && /suricata-entrypoint.sh" ]
         stdin: true
         tty: true
         securityContext:
