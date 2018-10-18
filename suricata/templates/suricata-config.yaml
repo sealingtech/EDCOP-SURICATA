@@ -483,91 +483,37 @@ data:
     ##
 
     # Linux high speed capture support
-    {{ if.Values.suricataConfig.useHostNetworking }}
-      {{ if .Values.suricataConfig.inline }}
     af-packet:
-        - interface: {{  .Values.networks.hostNetworkingInterface1 }}
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: no
+        - interface: ${INTERFACE1}
           cluster-type: cluster_flow
           cluster-id: 98
-          copy-mode: ips
-          copy-iface: {{  .Values.networks.hostNetworkingInterface2 }}
           buffer-size: 64535
           use-mmap: yes
+          {{- if .Values.suricataConfig.inline }}
+          threads: {{  .Values.suricataConfig.net0Threads }}
+          defrag: no
+          copy-mode: ips
+          copy-iface: ${INTERFACE2}
           tpacket-v3: no
-        - interface: {{  .Values.networks.hostNetworkingInterface2 }}
+          {{- else }}
+          defrag: yes
+          copy-mode: tap
+          tpacket-v3: yes
+          {{- end }}
+        {{- if .Values.suricataConfig.inline }}
+        - interface: ${INTERFACE2}
           threads: {{  .Values.suricataConfig.net1Threads }} 
           cluster-id: 97
           defrag: no
           cluster-type: cluster_flow
           copy-mode: ips
-          copy-iface: {{  .Values.networks.hostNetworkingInterface1 }}
+          copy-iface: ${INTERFACE1}
           buffer-size: 64535
           use-mmap: yes
           tpacket-v3: no
-      {{ else }}
-    af-packet:
-        - interface: {{  .Values.networks.hostNetworkingInterface1 }}
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: yes
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: tap
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: yes
-        # Put default values here. These will be used for an interface that is not
-        # in the list above.
+        {{- else }}
         - interface: default
-          #threads: auto
-          #use-mmap: no
-          #rollover: yes
-          #tpacket-v3: yes
-      {{ end }}
-    {{ else }}
-      {{ if .Values.suricataConfig.inline }}    
-    af-packet:
-        - interface: net0
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: no
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: ips
-          copy-iface: net1
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-        - interface: net1
-          threads: {{  .Values.suricataConfig.net1Threads }} 
-          cluster-id: 97
-          defrag: no
-          cluster-type: cluster_flow
-          copy-mode: ips
-          copy-iface: net0
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: no
-      {{ else }}
-    af-packet:
-        - interface: net0
-          threads: {{  .Values.suricataConfig.net0Threads }}
-          defrag: yes
-          cluster-type: cluster_flow
-          cluster-id: 98
-          copy-mode: tap
-          buffer-size: 64535
-          use-mmap: yes
-          tpacket-v3: yes
-        # Put default values here. These will be used for an interface that is not
-        # in the list above.
-        - interface: default
-          #threads: auto
-          #use-mmap: no
-          #rollover: yes
-          #tpacket-v3: yes
-      {{ end }} 
-    {{ end }}   
+        {{- end }}
     # Cross platform libpcap capture support
     pcap:
       - interface: eth0

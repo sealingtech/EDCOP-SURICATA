@@ -1,11 +1,17 @@
 FROM centos:latest
-MAINTAINER Ed Sealing <ed.sealing@sealingtech.org>
 
-#Install required libraries
+# Version Number
+ENV VERSION="4.0.5"
+
+# Installation
 RUN yum -y update && \
         yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis.x86_64 hiredis-devel.x86_64&& \
-        yum -y install automake autoconf git libtool make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel which bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64&& \
+        yum -y install automake autoconf git libtool make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel which bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
+        yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
+        pip install --upgrade pip && \
+        pip install --pre --upgrade suricata-update && \
+        mkdir -p /var/lib/suricata/rules && \
         gem install fpm && \
         mkdir /tmp/{build,hyperscan,ragel,boost-1.64,suricata,rpms} && \
         cd /tmp/build && \
@@ -33,13 +39,13 @@ RUN yum -y update && \
         fpm --prefix=/usr/ -s dir -t rpm -n hyperscan -v 4.3.1 -d 'ragel' -C /tmp/hyperscan -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/hyperscan*.rpm && \
         cd /tmp/build && \
-        curl -L -O https://www.openinfosecfoundation.org/download/suricata-4.0.1.tar.gz && \
-        tar xzf suricata-4.0.1.tar.gz && \
-        cd suricata-4.0.1 && \
+        curl -L -O https://www.openinfosecfoundation.org/download/suricata-$VERSION.tar.gz && \
+        tar xzf suricata-$VERSION.tar.gz && \
+        cd suricata-$VERSION && \
         ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-hiredis --enable-nfqueue --with-libhs-libraries=/usr/lib/ --with-libhs-includes=/usr/include/hs/ --enable-lua --enable-geoip && \
         make && \
         make install-full DESTDIR=/tmp/suricata && \
-        fpm --prefix=/ -s dir -t rpm -n suricata -v 4.0.1 -C /tmp/suricata/ -p /tmp/rpms/ && \
+        fpm --prefix=/ -s dir -t rpm -n suricata -v $VERSION -C /tmp/suricata/ -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/{hyperscan-*.rpm,ragel-*.rpm,suricata-*.rpm} && \
         ldconfig && \
         cd / && \
@@ -47,16 +53,18 @@ RUN yum -y update && \
         yum -y erase automake autoconf git make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel zlib-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel bzip2 dwz elfutils fipscheck fipscheck-lib gdb libgnome-keyring libnfnetlink-devel libstdc++-devel nspr-devel nss-softokn-devel nss-softokn-freebl-devel nss-util-devel openssh openssh-clients perl-Error perl-Git perl-TermReadKey perl-srpm-macros python-construct python-six redhat-rpm-config rubygem-bigdecimal rubygem-io-console rubygem-json rubygem-psych rubygem-rdoc unzip zip sqlite-devel && \
         rm -rf /tmp/{hyperscan,suricata,ragel,boost-1.64,build,rpms} && \
         yum -y clean all
-
-RUN yum -y install wget
-RUN useradd -s /sbin/nologin suri
-RUN chown -R suri:suri /var/run/suricata/
-RUN chown -R suri:suri /var/log/suricata/
         
+RUN useradd -s /sbin/nologin suri && \
+    chown -R suri:suri /var/run/suricata/ && \
+    chown -R suri:suri /var/log/suricata/
+        
+COPY suricata-entrypoint.sh /suricata-entrypoint.sh
+COPY update-entrypoint.sh /update-entrypoint.sh
+RUN chmod +x suricata-entrypoint.sh update-entrypoint.sh
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x docker-entrypoint.sh
-RUN cp docker-entrypoint.sh /bin
-RUN mkdir -p /logs/suricata
+ENV INTERFACE1=eth0 \
+	INTERFACE2=eth1
+# Should be set by Helm, do not change here
+ENV CHART_PREFIX=suricata
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/suricata-entrypoint.sh"]

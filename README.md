@@ -23,36 +23,33 @@ Please share any bugs or features requests via GitHub issues.
  
 ## Image Repository
 
-By default, images are pulled from *edcop-master:5000* which is presumed to be hosted on the master node. If you're changing this value, make sure you use the full repository name.
+By default, images are pulled from official EDCOP's official repositorie, and the respective tool's official repository. If you're changing this value, make sure you use the full repository name.
  
 ```
 images:
-  suricata: gcr.io/edcop-public/suricata:1
-  logstash: docker.elastic.co/logstash/logstash:6.2.4
+  suricata: gcr.io/edcop-public/suricata:2
+  logstash: docker.elastic.co/logstash/logstash:6.4.0
   redis: redis:4.0.9
+  runner: gcr.io/edcop-public/runner:8
 ```
  
 ## Networks
 
 Suricata uses 2 or 3 interfaces depending on whether it is in passive or inline mode. If you choose passive mode, net2 will be ignored and net1 will be the name of the passive interface.
 By default, these interfaces are named *calico*, *passive*, *inline-1*, and *inline-2*.
-When useHostNetworking is set to true these interfaces are named *calico*, *hostNetworkingInterface1*, and *hostNetworkingInterface2*.
+When useHostNetworking is set to true these interfaces are named *calico*, and the names of the interfaces you used in [EDCOP-CONFIGURESENSORS](https://github.com/sealingtech/EDCOP-CONFIGURESENSORS).
 
-useHostNetworking is used in situations where container networking is insufficient (such as the lack of SR-IOV).  This allows the container to see all physical interfaces of the nodes.  This has some security concerns due to the fact that Suricata now have access to all physical networking.  When useHostNetworking is set, specify hostNetworkingInterface to match the physical interface of the nodes being deployed to. If using passive mode only *hostNetworkingInterface1* will be used. If using inline then both *hostNetworkingInterface1* and *hostNetworkingInterface2* will be used. Again this must match the interface name on the physical node to which it will be deployed. When useHostNetworking is specified, the container will still be joined to the Calico network, but will ignore passive, inline-1, and inline-2. 
+useHostNetworking is used in situations where container networking is insufficient (such as the lack of SR-IOV).  This allows the container to see all physical interfaces of the nodes.  This has some security concerns due to the fact that Suricata now have access to all physical networking.  When useHostNetworking is set, the interface names will be pulled from the secrets created by the CONFIGURESENSORS repository. If using passive mode only the *passive interface* will be used. If using inline, then both *inline-interface1* and *inline-interface2* will be used. When useHostNetworking is specified, the container will still be joined to the Calico network, but will ignore passive, inline-1, and inline-2 SR-IOV networks. 
 
 ```
 networks:
   overlay: calico
   net1: passive
   net2: 
-```
-
-```
-networks:
-  overlay: calico
+  
+suricataConfig:
   useHostNetworking: false
-  hostNetworkingInterface1: eth0 #change this to physical interface name
-  hostNetworkingInterface2: eth1 #change this to physical interface name only used when inline
+  inline: false
 ```
 
 ```
@@ -60,6 +57,18 @@ networks:
   overlay: calico
   net1: inline-1
   net2: inline-2
+  
+suricataConfig:
+  useHostNetworking: false
+  inline: true
+```
+
+```
+networks:
+  overlay: calico
+  
+suricataConfig:
+  useHostNetworking: true
 ```
  
 To find the names of your networks, use the following command:

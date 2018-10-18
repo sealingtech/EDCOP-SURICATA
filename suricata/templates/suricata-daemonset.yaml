@@ -18,7 +18,7 @@ spec:
       labels:
         app: suricata
       annotations:
-      {{ if .Values.suricataConfig.useHostNetworking }}
+      {{ if .Values.networks.useHostNetworking }}
           networks: '[
           { "name": "{{  .Values.networks.overlay }}" },
         ]'
@@ -37,24 +37,33 @@ spec:
         {{ end }}
       {{ end }}
     spec:
-      {{ if.Values.suricataConfig.useHostNetworking }}hostNetwork: true{{ end }}
+      {{ if.Values.networks.useHostNetworking }}hostNetwork: true{{ end }}
       initContainers:
       - name: verifynode
         image: {{ .Values.images.runner }}
         env:
+        - name: INTERFACE
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.suricataConfig.inline }}
+              name: inline-interface1
+              {{- else }}
+              name: passive-interface
+              {{- end }}
+              key: interface
         - name: STARTUP_SCRIPT
           value: |
             #!/bin/bash
             set -e
             sleep 10
-            if [ ! -f /sys/class/net/net0/operstate ]; then
-            echo "Network interface 'net0' not found, exiting..."
+            if [ ! -f /sys/class/net/$INTERFACE/operstate ]; then
+            echo "Network interface '$INTERFACE' not found, exiting..."
             exit 1
             fi
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
-        commnd: [ "/suricata-entrypoint.sh" ]
+        commnd: [ "bash", "-c", "cp -R /tmp/suricata /etc/suricata/ && /suricata-entrypoint.sh" ]
         stdin: true
         tty: true
         securityContext:
@@ -64,8 +73,25 @@ spec:
                 - NET_ADMIN
                 - SYS_NICE #Needed for CPU pinning
                 - NET_RAW
+        env:
+        - name: INTERFACE1
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.suricataConfig.inline }}
+              name: inline-interface1
+              {{- else }}
+              name: passive-interface
+              {{- end }}
+              key: interface
+        {{- if .Values.suricataConfig.inline }}
+        - name: INTERFACE2
+          valueFrom:
+            secretKeyRef:
+              name: inline-interface2
+              key: interface
+        {{- end }}
         volumeMounts:
-          - mountPath: /etc/suricata
+          - mountPath: /tmp/suricata
             name: suricata-config
           - mountPath: /data/suricata
             name: suricata-logs
