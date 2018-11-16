@@ -52,6 +52,9 @@ RUN yum -y update && \
         echo y | gem uninstall fpm && \
         yum -y erase automake autoconf git make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel zlib-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel bzip2 dwz elfutils fipscheck fipscheck-lib gdb libgnome-keyring libnfnetlink-devel libstdc++-devel nspr-devel nss-softokn-devel nss-softokn-freebl-devel nss-util-devel openssh openssh-clients perl-Error perl-Git perl-TermReadKey perl-srpm-macros python-construct python-six redhat-rpm-config rubygem-bigdecimal rubygem-io-console rubygem-json rubygem-psych rubygem-rdoc unzip zip sqlite-devel && \
         rm -rf /tmp/{hyperscan,suricata,ragel,boost-1.64,build,rpms} && \
+		curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+		chmod +x ./kubectl && \
+		mv ./kubectl /usr/local/bin/kubectl && \
         yum -y clean all
         
 RUN useradd -s /sbin/nologin suri && \
