@@ -9,7 +9,7 @@ fi
 
 sleep 10
 
-wget -P / https://repos.dds.io/rules/emerging.rules.tar.gz
+wget -P / http://repos.dds.io/rules/emerging.rules.tar.gz
 tar xvzf /emerging.rules.tar.gz -C /
 
 
