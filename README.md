@@ -28,7 +28,7 @@ By default, images are pulled from official EDCOP's official repositorie, and th
 ```
 images:
   suricata: gcr.io/edcop-public/suricata:2
-  logstash: docker.elastic.co/logstash/logstash:6.4.0
+  logstash: docker.elastic.co/logstash/logstash:6.5.1
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
 ```
