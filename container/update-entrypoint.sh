@@ -17,7 +17,7 @@ SURICATA_PODS=`kubectl get pods -o go-template --template '{{range .items}}{{.me
 # Try 10 times before giving up 
 COUNTER=0
 until [ "SURICATA_PODS" != "" ]; do
-  if [ $COUNTER -ge 10 ]
+  if [ $COUNTER -ge 10 ]; then
     echo "Too many tries, exiting... "
     exit 1
   fi
