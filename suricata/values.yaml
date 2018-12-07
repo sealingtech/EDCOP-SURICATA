@@ -1,7 +1,7 @@
 # EDCOP Suricata Chart values
 images:
   #Repositories to pull images from
-  suricata: gcr.io/edcop-public/suricata:2
+  suricata: gcr.io/edcop-dev/suricata:0.9.2
   logstash: docker.elastic.co/logstash/logstash:6.4.2
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
@@ -28,7 +28,7 @@ deploymentOptions:
     nodePort: 30029
 suricataConfig:
   #If inline is set to true the Suricata pod will have three network interfaces, and will be set to take layer 2 traffic in and output it to the other interface as well as connected to the overlay network.  If the option is set to false then Suricata will have two interfaces, one for the passive and the other for the network.
-  inline: true
+  inline: false
   #If alertsOnly is set to true then Suricata will not record logs for http,dns,tls,smtp. This is common when using another tool that may already be recording this such as Bro.
   alertsOnly: false
   #Specifies internal networks that will be monitored.  This sets the direction of rules.
@@ -58,6 +58,61 @@ suricataConfig:
   ruleModifications:
     enableConf:
       - #2019401  < Example rule number to enable
+      - group:botcc.rules
+      # - group:botcc.portgrouped.rules
+      - group:ciarmy.rules
+      - group:compromised.rules
+      - group:drop.rules
+      - dshield.rules
+     # - group:emerging-activex.rules
+      - group:emerging-attack_response.rules
+      - group:emerging-chat.rules
+      - group:emerging-current_events.rules
+      - group:emerging-dns.rules
+      - group:emerging-dos.rules
+      - group:emerging-exploit.rules
+      - group:emerging-ftp.rules
+     # - group:emerging-games.rules
+     # - group:emerging-icmp_info.rules
+     # - group:emerging-icmp.rules
+      - group:emerging-imap.rules
+     # - group:emerging-inappropriate.rules
+     # - group:emerging-info.rules
+      - group:emerging-malware.rules
+      - group:emerging-misc.rules
+      - group:emerging-mobile_malware.rules
+      - group:emerging-netbios.rules
+      - group:emerging-p2p.rules
+      - group:emerging-policy.rules
+      - group:emerging-pop3.rules
+      - group:emerging-rpc.rules
+     # - group:emerging-scada.rules
+     # - group:emerging-scada_special.rules
+      - group:emerging-scan.rules
+     # - group:emerging-shellcode.rules
+      - group:emerging-smtp.rules
+      - group:emerging-snmp.rules
+      - group:emerging-sql.rules
+      - group:emerging-telnet.rules
+      - group:emerging-tftp.rules
+      - group:emerging-trojan.rules
+      - group:emerging-user_agents.rules
+      - group:emerging-voip.rules
+      - group:emerging-web_client.rules
+      - group:emerging-web_server.rules
+     # - group:emerging-web_specific_apps.rules
+      - group:emerging-worm.rules
+      - group:tor.rules
+     # - group:decoder-events.rules # available in suricata sources under rules dir
+     # - group:stream-events.rules  # available in suricata sources under rules dir
+      - group:http-events.rules    # available in suricata sources under rules dir
+      - group:smtp-events.rules    # available in suricata sources under rules dir
+      - group:dns-events.rules     # available in suricata sources under rules dir
+      - group:tls-events.rules     # available in suricata sources under rules dir
+     # - group:modbus-events.rules  # available in suricata sources under rules dir
+     # - group:app-layer-events.rules  # available in suricata sources under rules dir
+     # - group:dnp3-events.rules       # available in suricata sources under rules dir
+     # - group:ntp-events.rules       # available in suricata sources under rules dir
     disableConf:
       - #2019401 < Example rule number to disable
     dropConf:
