@@ -482,7 +482,7 @@ data:
 
     # Linux high speed capture support
     af-packet:
-        - interface: ${INTERFACE1}
+        - interface: ${INTERFACE1} 
           cluster-type: cluster_flow
           cluster-id: 98
           buffer-size: 64535
@@ -491,7 +491,7 @@ data:
           threads: {{  .Values.suricataConfig.net0Threads }}
           defrag: no
           copy-mode: ips
-          copy-iface: ${INTERFACE2}
+          copy-iface: ${INTERFACE2} 
           tpacket-v3: no
           {{- else }}
           defrag: yes
@@ -499,13 +499,13 @@ data:
           tpacket-v3: yes
           {{- end }}
         {{- if .Values.suricataConfig.inline }}
-        - interface: ${INTERFACE2}
+        - interface: ${INTERFACE2} 
           threads: {{  .Values.suricataConfig.net1Threads }} 
           cluster-id: 97
           defrag: no
           cluster-type: cluster_flow
           copy-mode: ips
-          copy-iface: ${INTERFACE1}
+          copy-iface: ${INTERFACE1} 
           buffer-size: 64535
           use-mmap: yes
           tpacket-v3: no

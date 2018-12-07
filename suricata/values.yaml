@@ -10,12 +10,12 @@ networks:
   overlay: 'calico'
   # Net 1 is the name of the first interface
   # If using inline, change to 'inline-1'
-  net1: 'passive'
+  net1: 'ens224'
   # Net 2 is the name of the second interface
   # **This will be ignored when passive is selected in suricataConfig section
   net2: 'inline-2'
   #useHostNetworking If this option is set to true, the container will see all physical interfaces on the physical host it resides.  This has some security issues but can be useful in some situations.
-  useHostNetworking: false
+  useHostNetworking: true 
 # NodeSelector can be used when it is desired to over-ride the default sensor.  For example, if it was desired to specify passive and inline sections of the network.
 nodeSelector:
   label: sensor

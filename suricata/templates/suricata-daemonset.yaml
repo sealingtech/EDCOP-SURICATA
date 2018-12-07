@@ -42,7 +42,7 @@ spec:
       - name: verifynode
         image: {{ .Values.images.runner }}
         env:
-        - name: INTERFACE
+        - name: INTERFACE1
           valueFrom:
             secretKeyRef:
               {{- if .Values.suricataConfig.inline }}
@@ -51,6 +51,13 @@ spec:
               name: passive-interface
               {{- end }}
               key: interface
+        {{- if .Values.suricataConfig.inline }}
+        - name: INTERFACE2
+          valueFrom:
+            secretKeyRef:
+              name: inline-interface2
+              key: interface
+        {{- end }}
         - name: STARTUP_SCRIPT
           value: |
             #!/bin/bash
@@ -91,7 +98,7 @@ spec:
               key: interface
         {{- end }}
         volumeMounts:
-          - mountPath: /tmp/suricata
+          - mountPath:  /tmp/suricata
             name: suricata-config
           - mountPath: /data/suricata
             name: suricata-logs
