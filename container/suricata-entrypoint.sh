@@ -7,10 +7,10 @@ if [ ! -d "/logs/suricata" ]; then
   mkdir -p /logs/suricata
 fi
 
-cp -rpf /tmp/suricata/* /etc/suricata/
+#cp -rpf /tmp/suricata/* /etc/suricata/
 
-sed -i 's/${INTERFACE1}/'$INTERFACE1' /g' /etc/suricata/suricata.yaml
-sed -i 's/${INTERFACE2}/'$INTERFACE2' /g' /etc/suricata/suricata.yaml
+#sed -i 's/${INTERFACE1}/'$INTERFACE1' /g' /etc/suricata/suricata.yaml
+#sed -i 's/${INTERFACE2}/'$INTERFACE2' /g' /etc/suricata/suricata.yaml
 
 
 # Start Suricata normally
