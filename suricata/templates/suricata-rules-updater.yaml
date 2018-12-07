@@ -27,17 +27,17 @@ spec:
         - name: CHART_PREFIX
           value: {{ template "suricata.fullname" . }}
         volumeMounts:
-        #- name: suricata-update-conf
-        #  mountPath: /etc/suricata/update.yaml
-        #  subPath: update.yaml
+        - name: suricata-update-conf
+          mountPath: /etc/suricata/update.yaml
+          subPath: update.yaml
         - name: suricata-rules-pvc
           mountPath: /var/lib/suricata/rules
         - name: suricata-config
           mountPath: /etc/suricata
       volumes:
-      #- name: suricata-update-conf
-      #  configMap: 
-      #    name: {{ template "suricata.fullname" . }}-update-conf
+      - name: suricata-update-conf
+        configMap: 
+          name: {{ template "suricata.fullname" . }}-update-conf
       - name: suricata-config
         configMap:
           name: {{ template "suricata.fullname" . }}-update-config
@@ -82,17 +82,17 @@ spec:
             - name: CHART_PREFIX
               value: {{ template "suricata.fullname" . }}
             volumeMounts:
-            #- name: suricata-update-conf
-            #  mountPath: /etc/suricata/update.yaml
-            #  subPath: update.yaml
+            - name: suricata-update-conf
+              mountPath: /etc/suricata/update.yaml
+              subPath: update.yaml
             - name: suricata-config
               mountPath: /etc/suricata
             - name: suricata-rules-pvc
               mountPath: /var/lib/suricata/rules
           volumes:
-          #- name: suricata-update-conf
-          #  configMap: 
-          #    name: {{ template "suricata.fullname" . }}-update-conf
+          - name: suricata-update-conf
+            configMap: 
+              name: {{ template "suricata.fullname" . }}-update-conf
           - name: suricata-rules-pvc
             persistentVolumeClaim:
               claimName: {{ template "suricata.fullname" . }}-rules-pvc

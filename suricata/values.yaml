@@ -50,6 +50,20 @@ suricataConfig:
   # Set how often you want download new rules and reset Suricata
   # Accepts cronjob format, default runs once per day
   rulesUpdateSchedule: "1 0 * * *"
+  # List of all resources that will be pulled
+  rulesSources:
+    - https://rules.emergingthreats.net/open/suricata-%(__version__)s/emerging.rules.tar.gz
+    - https://sslbl.abuse.ch/blacklist/sslblacklist.rules
+  # List of rule modifications.  This takes the same format as suricata-updates files, but needs a dash before each line.  For more details: https://suricata-update.readthedocs.io/en/latest/update.html#rule-matching
+  ruleModifications:
+    enableConf:
+      - #2019401  < Example rule number to enable
+    disableConf:
+      - #2019401 < Example rule number to disable
+    dropConf:
+      - #2019401 < Example rule number drop
+    modifyConf:
+      - #modifysid * "^drop(.*)noalert(.*)" | "alert${1}noalert${2}"  < Exmaple rule to modify
   # Requests are set to accomodate limited resource VMs
   requests:
     cpu: 100m
