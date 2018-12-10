@@ -11,8 +11,6 @@ ls -la /tmp/suricata
 echo "=====/etc/suricata contents======
 ls -la /etc/suricata
 
-cp -rpf /tmp/suricata/* /etc/suricata/
-
 sed -i 's/${INTERFACE1}/'$INTERFACE1' /g' /etc/suricata/suricata.yaml
 sed -i 's/${INTERFACE2}/'$INTERFACE2' /g' /etc/suricata/suricata.yaml
 
