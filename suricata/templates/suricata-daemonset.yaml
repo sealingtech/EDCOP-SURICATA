@@ -70,7 +70,7 @@ spec:
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
-        command: [ "bash", "-c", "rm -rf /etc/suricata && \cp -rpf -L /tmp/suricata/* /etc/suricata && /suricata-entrypoint.sh" ]
+        command: [ "bash", "-c", "until curl -sSf http://localhost:6379; do sleep 2; done && rm -rf /etc/suricata/* && cp -rpf -L /tmp/suricata/* /etc/suricata/ && /suricata-entrypoint.sh" ]
         stdin: true
         tty: true
         securityContext:
