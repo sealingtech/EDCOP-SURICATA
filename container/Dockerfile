@@ -1,7 +1,7 @@
 FROM centos:latest
 
 # Version Number
-ENV VERSION="4.0.5"
+ENV VERSION="4.1.0"
 
 # Installation
 RUN yum -y update && \
