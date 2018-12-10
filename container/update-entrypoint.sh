@@ -38,7 +38,11 @@ echo
 for pod in $SURICATA_PODS
 do
   echo "Reloading rules in $pod"
-  kubectl exec $pod -c suricata -- suricatasc -c reload-rules
+  if kubectl exec $pod -c suricata -- suricatasc -c reload-rules; then
+    echo "Successfully reloaded rules in pod $pod"
+  else
+    echo "First time loading, reload not neededn in pod $pod"
+  fi
   sleep 10 
 done
  
