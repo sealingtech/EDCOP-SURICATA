@@ -8,7 +8,7 @@ mkdir -p /data/suricata /logs/suricata
 sleep 10
 
 # Update rules, testing takes too long and will be done when Suricata loads anyway
-suricata-update --no-test
+suricata-update --no-test --no-reload
 
 # Get list of Suricata Pods - REQUIRES RBAC
 echo "Getting list of Suricata Pods..."
