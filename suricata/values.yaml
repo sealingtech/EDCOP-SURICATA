@@ -1,7 +1,7 @@
 # EDCOP Suricata Chart values
 images:
   #Repositories to pull images from
-  suricata: gcr.io/edcop-dev/suricata:0.9.12
+  suricata: gcr.io/edcop-dev/suricata:0.9.15
   logstash: docker.elastic.co/logstash/logstash:6.4.2
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
@@ -52,7 +52,7 @@ suricataConfig:
   rulesUpdateSchedule: "* */10 * * *"
   # List of all resources that will be pulled
   rulesSources:
-    - https://rules.emergingthreats.net/open/suricata-%(__version__)s/emerging.rules.tar.gz
+    - https://rules.emergingthreats.net/open/suricata-4.0/emerging.rules.tar.gz
     - https://sslbl.abuse.ch/blacklist/sslblacklist.rules
   # List of rule modifications.  This takes the same format as suricata-updates files, but needs a dash before each line.  For more details: https://suricata-update.readthedocs.io/en/latest/update.html#rule-matching
   ruleModifications:
@@ -126,7 +126,7 @@ suricataConfig:
   # These limit the number of CPU cores and memory the sensor can use.
   limits:
     cpu: 2
-    memory: 2G
+    memory: 4G
 #Logstash values will be ignored if standalone is set to true as no logstash will be built.
 logstashConfig:
   # Limits the number of threads that will be used by Logstash

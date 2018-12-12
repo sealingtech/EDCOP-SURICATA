@@ -107,6 +107,23 @@ data:
             pipelining:
               enabled: yes ## set enable to yes to enable query pipelining
               batch-size: 10 ## number of entry to keep in buffer
+          # Include top level metadata. Default yes.
+          #metadata: no
+
+          pcap-file: false
+
+          # Community Flow ID
+          # Adds a 'community_id' field to EVE records. These are meant to give
+          # a records a predictable flow id that can be used to match records to
+          # output of other tools such as Bro.
+          #
+          # Takes a 'seed' that needs to be same across sensors and tools
+          # to make the id less predictable.
+
+          # enable/disable the community id feature.
+          community-id: false
+          # Seed value for the ID output. Valid values are 0-65535.
+          community-id-seed: 0
           types:
             - alert:
                 payload: yes             # enable dumping payload in Base64
@@ -151,24 +168,70 @@ data:
                 # the example below adds three additional fields when uncommented
                 #custom: [Accept-Encoding, Accept-Language, Authorization]
             - dns:
-                # control logging of queries and answers
-                # default yes, no to disable
+                # This configuration uses the new DNS logging format,
+                # the old configuration is still available:
+                # http://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html#eve-extensible-event-format
+                # Use version 2 logging with the new format:
+                # DNS answers will be logged in one single event
+                # rather than an event for each of it.
+                # Without setting a version the version
+                # will fallback to 1 for backwards compatibility.
+                # Note: version 1 is not available with rust enabled
+                version: 2
                 {{ if .Values.suricataConfig.alertsOnly }}
-                query: no     # enable logging of DNS queries
-                answer: no    # enable logging of DNS answers
+                # Enable/disable this logger. Default: enabled.
+                enabled: no
+
+                # Control logging of requests and responses:
+                # - requests: enable logging of DNS queries
+                # - responses: enable logging of DNS answers
+                # By default both requests and responses are logged.
+                requests: no
+                responses: no
+
+                # Format of answer logging:
+                # - detailed: array item per answer
+                # - grouped: answers aggregated by type
+                # Default: all
+                #formats: [detailed, grouped]
+
+                # Answer types to log.
+                # Default: all
+                #types: [a, aaaa, cname, mx, ns, ptr, txt]
                 {{ else }}
-                query: yes     # enable logging of DNS queries
-                answer: yes    # enable logging of DNS answers
+                # Enable/disable this logger. Default: enabled.
+                enabled: yes
+
+                # Control logging of requests and responses:
+                # - requests: enable logging of DNS queries
+                # - responses: enable logging of DNS answers
+                # By default both requests and responses are logged.
+                #requests: no
+                #responses: no
+
+                # Format of answer logging:
+                # - detailed: array item per answer
+                # - grouped: answers aggregated by type
+                # Default: all
+                #formats: [detailed, grouped]
+
+                # Answer types to log.
+                # Default: all
+                #types: [a, aaaa, cname, mx, ns, ptr, txt]
                 {{ end }}
-                # control which RR types are logged
-                # all enabled if custom not specified
-                #custom: [a, aaaa, cname, mx, ns, ptr, txt]
+
             - tls:
                 {{ if .Values.suricataConfig.alertsOnly }}
                 extended: no     # enable this for extended logging information
                 {{ else }}
                 extended: yes     # enable this for extended logging information
-                {{ end }}                
+                {{ end }}
+                # output TLS transaction where the session is resumed using a
+                # session id
+                #session-resumption: no
+                # custom allows to control which tls fields that are included
+                # in eve-log
+                #custom: [subject, issuer, session_resumed, serial, fingerprint, sni, version, not_before, not_after, certificate, chain, ja3]                
             - files:
                 force-magic: no   # force logging magic on all logged files
                 # force logging of checksums, available hash functions are md5,
@@ -313,6 +376,11 @@ data:
 
           # If set to a value will enable ring buffer mode. Will keep Maximum of "max-files" of size "limit"
           max-files: 2000
+
+          # Compression algorithm for pcap files. Possible values: none, lz4.
+          # Enabling compression is incompatible with the sguil mode. Note also
+          # that on Windows, enabling compression will *increase* disk I/O.
+          compression: none
 
           mode: normal # normal, multi or sguil.
 
@@ -570,16 +638,30 @@ data:
     # "detection-only" enables protocol detection only (parser disabled).
     app-layer:
       protocols:
+        krb5:
+          enabled: no
+        ikev2:
+          enabled: yes      
         tls:
           enabled: yes
           detection-ports:
             dp: 443
+                # Generate JA3 fingerprint from client hello
+          ja3-fingerprints: no
 
-          # Completely stop processing TLS/SSL session after the handshake
-          # completed. If bypass is enabled this will also trigger flow
-          # bypass. If disabled (the default), TLS/SSL session is still
-          # tracked for Heartbleed and other anomalies.
-          #no-reassemble: yes
+          # What to do when the encrypted communications start:
+          # - default: keep tracking TLS session, check for protocol anomalies,
+          #            inspect tls_* keywords. Disables inspection of unmodified
+          #            'content' signatures.
+          # - bypass:  stop processing this flow as much as possible. No further
+          #            TLS parsing and inspection. Offload flow bypass to kernel
+          #            or hardware if possible.
+          # - full:    keep tracking and inspection as normal. Unmodified content
+          #            keyword signatures are inspected as well.
+          #
+          # For best performance, select 'bypass'.
+          #
+          #encrypt-handling: default
         dcerpc:
           enabled: yes
         ftp:
@@ -625,6 +707,14 @@ data:
         # smb2 detection is disabled internally inside the engine.
         #smb2:
         #  enabled: yes
+
+        # Note: NFS parser depends on Rust support: pass --enable-rust
+        # to configure.
+        nfs:
+          enabled: yes
+        tftp:
+          enabled: no       
+           
         dns:
           # memcaps. Globally and per flow/state.
           #global-memcap: 16mb
@@ -708,6 +798,20 @@ data:
                # auto will use http-body-inline mode in IPS mode, yes or no set it statically
                http-body-inline: auto
 
+               # Decompress SWF files.
+               # 2 types: 'deflate', 'lzma', 'both' will decompress deflate and lzma
+               # compress-depth:
+               # Specifies the maximum amount of data to decompress,
+               # set 0 for unlimited.
+               # decompress-depth:
+               # Specifies the maximum amount of decompressed data to obtain,
+               # set 0 for unlimited.
+               swf-decompression:
+                 enabled: yes
+                 type: both
+                 compress-depth: 0
+                 decompress-depth: 0
+
                # Take a random value for inspection sizes around the specified value.
                # This lower the risk of some evasion technics but could lead
                # detection change between runs. It is set to 'yes' by default.
@@ -780,6 +884,13 @@ data:
           detection-ports:
             dp: 44818
             sp: 44818
+
+        # Note: parser depends on Rust support
+        ntp:
+          enabled: yes
+
+        dhcp:
+          enabled: no               
 
     # Limit for the maximum number of asn1 frames to decode (default 256)
     asn1-max-frames: 256
@@ -1742,3 +1853,4 @@ data:
     config classification: inappropriate-content,Inappropriate Content was Detected,1
     config classification: policy-violation,Potential Corporate Privacy Violation,1
     config classification: default-login-attempt,Attempt to Login By a Default Username and Password,2
+

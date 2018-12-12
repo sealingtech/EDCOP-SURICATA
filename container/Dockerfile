@@ -76,7 +76,7 @@ RUN  cd /tmp/build && \
         curl -L -O https://www.openinfosecfoundation.org/download/suricata-$VERSION.tar.gz && \
         tar xzf suricata-$VERSION.tar.gz && \
         cd suricata-$VERSION && \
-        ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-hiredis --enable-nfqueue --with-libhs-libraries=/usr/lib/ --with-libhs-includes=/usr/include/hs/  --with-libhtp-libraries=/usr/local/lib/ --enable-lua --enable-geoip && \
+        ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-hiredis --enable-nfqueue --with-libhs-libraries=/usr/lib/ --with-libhs-includes=/usr/include/hs/  --with-libhtp-libraries=/usr/local/lib/ --enable-lua --enable-geoip --enable-rust && \
         make && \
         make install-full DESTDIR=/tmp/suricata && \
         fpm --prefix=/ -s dir -t rpm -n suricata -v $VERSION -C /tmp/suricata/ -p /tmp/rpms/ && \
