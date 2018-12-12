@@ -6,17 +6,17 @@ ENV VERSION="4.1.0"
 # Installation
 
 RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64&& \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64 && \
         yum -y install automake autoconf git libtool make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel which bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
         yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
         pip install --upgrade pip && \
         pip install --pre --upgrade suricata-update && \
         mkdir -p /var/lib/suricata/rules && \
         gem install fpm && \
-        mkdir /tmp/{build,hyperscan,ragel,boost-1.69,suricata,rpms,colm} && \
+        mkdir /tmp/{build,hyperscan,ragel,boost-1.69,suricata,rpms,colm,libhtp} && \
         echo "/usr/local/lib/" >> /etc/ld.so.conf.d/suricata.conf && \
-        ldconfig 
-        
+        ldconfig
+
 RUN  cd /tmp/build && \
         curl -L -O http://www.colm.net/files/colm/colm-0.13.0.6.tar.gz && \
         tar xvzf colm-0.13.0.6.tar.gz && \
@@ -54,8 +54,8 @@ RUN  cd /tmp/build && \
         cd hyperscan-5.0.0/build && \
         cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/hyperscan -DBUILD_STATIC_AND_SHARED=1 -DBOOST_ROOT=/tmp/boost-1.69/ ../ && \
         make && \
-        make install && \
-        fpm --prefix=/usr/ -s dir -t rpm -n hyperscan -v 5.0.0 -d 'ragel' -C /tmp/hyperscan -p /tmp/rpms/ && \
+        make DESTDIR=/tmp/hyperscan install && \
+        fpm --prefix=/usr/ -s dir -t rpm -n hyperscan -v 5.0.0 -C /tmp/hyperscan -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/hyperscan*.rpm && \
         ldconfig
 
@@ -67,7 +67,9 @@ RUN  cd /tmp/build && \
         ./autogen.sh && \
         ./configure && \
         make && \
-        make install && \
+        make DESTDIR=/tmp/libhtp/ install && \
+        fpm --prefix=/ -s dir -t rpm -n libhtp -v 0.5.28 -C /tmp/libhtp -p /tmp/rpms/ && \
+        yum -y localinstall /tmp/rpms/libhtp*.rpm && \
         ldconfig
 
 RUN  cd /tmp/build && \
@@ -78,20 +80,21 @@ RUN  cd /tmp/build && \
         make && \
         make install-full DESTDIR=/tmp/suricata && \
         fpm --prefix=/ -s dir -t rpm -n suricata -v $VERSION -C /tmp/suricata/ -p /tmp/rpms/ && \
-        ldconfig && \
-        cd / 
+        ldconfig
 
 
 FROM centos:latest
 RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis.x86_64 && \
         yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which python-pyelftools cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
         yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
         mkdir /tmp/rpms
 
 COPY --from=build /tmp/rpms/ /tmp/rpms
-RUN  cd /tmp/rpms/ && yum -y localinstall colm*.rpm ragel*.rpm hyperscan*.rpm suricata*.rpm
-        
+RUN  cd /tmp/rpms/ && yum -y localinstall *.rpm && \
+        echo "/usr/local/lib/" >> /etc/ld.so.conf.d/suricata.conf && \
+        ldconfig
+
 COPY  suricata-entrypoint.sh /suricata-entrypoint.sh
 COPY  update-entrypoint.sh /update-entrypoint.sh
 RUN  chmod +x suricata-entrypoint.sh update-entrypoint.sh && \
