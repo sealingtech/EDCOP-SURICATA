@@ -6,7 +6,7 @@ ENV VERSION="4.1.0"
 # Installation
 
 RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64 && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64 cargo rustc && \
         yum -y install automake autoconf git libtool make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel which bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
         yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
         pip install --upgrade pip && \
