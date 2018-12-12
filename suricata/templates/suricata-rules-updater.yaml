@@ -76,7 +76,7 @@ spec:
             - name: CHART_PREFIX
               value: {{ template "suricata.fullname" . }}
             volumeMounts:
-            - name: suricata-update-conf
+            - name: suricata-update-config
               mountPath: /etc/suricata/update.yaml
               subPath: update.yaml
             - name: suricata-config
@@ -84,9 +84,9 @@ spec:
             - name: suricata-rules-pvc
               mountPath: /var/lib/suricata/rules
           volumes:
-          - name: suricata-update-conf
+          - name: suricata-update-config
             configMap: 
-              name: {{ template "suricata.fullname" . }}-update-conf
+              name: {{ template "suricata.fullname" . }}-update-config
           - name: suricata-rules-pvc
             persistentVolumeClaim:
               claimName: {{ template "suricata.fullname" . }}-rules-pvc
