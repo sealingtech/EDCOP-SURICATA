@@ -1,7 +1,7 @@
 # EDCOP Suricata Chart values
 images:
   #Repositories to pull images from
-  suricata: gcr.io/edcop-dev/suricata:0.9.15
+  suricata: gcr.io/edcop-dev/suricata:0.9.16
   logstash: docker.elastic.co/logstash/logstash:6.4.2
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
@@ -47,13 +47,16 @@ suricataConfig:
   workerCpuSet: 1
   workerThreads: 1
   verdictCpuSet: 1
+  #Turning on rules updates will update the rules file for all deployed Suricata pods and cause them to reload the rules on a regular schedule as defined by rulesUpdateSchedule.  While updating is taking place, Suricata can take up to twice as much memory during this process, therefore if this is used raise the memory limit to at least 8G otherwise Suricata will be killed every time it is updated.  When Suricata is first deployed, you will still get the latest updates at the time suricata is deployed deployed regardless of what this option is set to.
+  enableRulesUpdates: false 
   # Set how often you want download new rules and reset Suricata
-  # Accepts cronjob format, default runs once per day
-  rulesUpdateSchedule: "* */10 * * *"
-  # List of all resources that will be pulled
+  # Accepts cronjob format, default runs twice per day
+  rulesUpdateSchedule: "* */12 * * *"
+  # List of all resources that will be pulled, can list multiple options
   rulesSources:
     - https://rules.emergingthreats.net/open/suricata-4.0/emerging.rules.tar.gz
-    - https://sslbl.abuse.ch/blacklist/sslblacklist.rules
+  # sslbl is currently down, not sure when it will be back up (or if)
+  #  - https://sslbl.abuse.ch/blacklist/sslblacklist.rules
   # List of rule modifications.  This takes the same format as suricata-updates files, but needs a dash before each line.  For more details: https://suricata-update.readthedocs.io/en/latest/update.html#rule-matching
   ruleModifications:
     enableConf:
@@ -123,7 +126,7 @@ suricataConfig:
   requests:
     cpu: 100m
     memory: 64Mi
-  # These limit the number of CPU cores and memory the sensor can use.
+  # These limit the number of CPU cores and memory the sensor can use.  If automatic rules updates are enabled, set memory to at least 8G.  A lot of factors can be required for the amount of memory that is needed (amount of traffic, number of rules, etc).  If you are seeing eccessive restarts of Suricata or OOM (Out of memory) killed errors in Kubernetes, up these values
   limits:
     cpu: 2
     memory: 4G

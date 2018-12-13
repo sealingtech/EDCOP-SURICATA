@@ -22,19 +22,19 @@ spec:
       containers:
       - name: suricata-rules
         image: {{ .Values.images.suricata }}
-        command: [ "/update-entrypoint.sh" ]
+        command: [ "bash", "-c", "/update-entrypoint.sh" ]
         env:
         - name: CHART_PREFIX
           value: {{ template "suricata.fullname" . }}
         volumeMounts:
-        - name: suricata-update-config
+        - name: suricata-config
           mountPath: /etc/suricata/
         - name: suricata-rules-pvc
           mountPath: /var/lib/suricata/rules
       volumes:
-      - name: suricata-update-config
+      - name: suricata-config
         configMap: 
-          name: {{ template "suricata.fullname" . }}-update-config
+          name: {{ template "suricata.fullname" . }}-config
       - name: suricata-rules-pvc
         persistentVolumeClaim:
           claimName: {{ template "suricata.fullname" . }}-rules-pvc
@@ -43,6 +43,7 @@ spec:
         
 ---
 
+{{ if .Values.suricataConfig.enableRulesUpdates  }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -71,28 +72,25 @@ spec:
           containers:
           - name: suricata-update
             image: {{ .Values.images.suricata }}
-            command: [ "/update-entrypoint.sh" ]
+            command: [ "bash", "-c", "/update-entrypoint.sh" ]
             env:
             - name: CHART_PREFIX
               value: {{ template "suricata.fullname" . }}
             volumeMounts:
-            - name: suricata-update-config
-              mountPath: /etc/suricata/update.yaml
-              subPath: update.yaml
             - name: suricata-config
-              mountPath: /etc/suricata
+              mountPath: /etc/suricata/
             - name: suricata-rules-pvc
               mountPath: /var/lib/suricata/rules
           volumes:
           - name: suricata-update-config
             configMap: 
-              name: {{ template "suricata.fullname" . }}-update-config
+              name: {{ template "suricata.fullname" . }}-config
           - name: suricata-rules-pvc
             persistentVolumeClaim:
               claimName: {{ template "suricata.fullname" . }}-rules-pvc
           - name: suricata-config
             configMap:
-              name: {{ template "suricata.fullname" . }}-update-config
+              name: {{ template "suricata.fullname" . }}-config
           restartPolicy: OnFailure 
           dnsPolicy: ClusterFirst
-    
+{{ end }}

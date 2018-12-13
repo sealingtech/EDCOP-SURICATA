@@ -1853,4 +1853,130 @@ data:
     config classification: inappropriate-content,Inappropriate Content was Detected,1
     config classification: policy-violation,Potential Corporate Privacy Violation,1
     config classification: default-login-attempt,Attempt to Login By a Default Username and Password,2
+  update.yaml: |
+    # Configuration with disable filters.
+    # - Overrided by --disable-conf
+    # - Default: /etc/suricata/disable.conf
+    disable-conf: /etc/suricata/disable.conf
 
+    # Configuration with enable filters.
+    # - Overrided by --enable-conf
+    # - Default: /etc/suricata/enable.conf
+    enable-conf: /etc/suricata/enable.conf
+
+    # Configuration with drop filters.
+    # - Overrided by --drop-conf
+    # - Default: /etc/suricata/drop.conf
+    drop-conf: /etc/suricata/drop.conf
+
+    # Configuration with modify filters.
+    # - Overrided by --modify-conf
+    # - Default: /etc/suricata/modify.conf
+    modify-conf: /etc/suricata/modify.conf
+
+    # List of files to ignore. Overrided by the --ignore command line option.
+    ignore:
+      - "*deleted.rules"
+
+    # Override the user-agent string.
+    #user-agent: "Suricata-Update"
+
+    # Provide an alternate command to the default test command.
+    #
+    # The following environment variables can be used.
+    # SURICATA_PATH - The path to the discovered suricata program.
+    # OUTPUT_DIR - The directory the rules are written to.
+    # OUTPUT_FILENAME - The name of the rule file. Will be empty if the rules
+    #                   were not merged.
+    #test-command: ${SURICATA_PATH} -T -S ${OUTPUT_FILENAME} -l /tmp
+
+    # Provide a command to reload the Suricata rules.
+    # May be overrided by the --reload-command command line option.
+    #reload-command: sudo systemctl reload suricata
+
+    # Remote rule sources. Simply a list of URLs.
+    sources:
+      {{- range .Values.suricataConfig.rulesSources }}
+      - {{ . }}
+      {{- end }}
+
+    # A list of local rule sources. Each entry can be a rule file, a
+    # directory or a wild card specification.
+    local:
+      # A directory of rules.
+      #- /etc/suricata/rules
+      # A single rule file.
+      #- /etc/suricata/rules/app-layer-events.rules
+      # A wildcard.
+      #- /etc/suricata/rules/*.rules
+  enable.conf: |
+    # suricata-update - enable.conf
+
+    # Example of enabling a rule by signature ID (gid is optional).
+    # 1:2019401
+    # 2019401
+
+    # Example of enabling a rule by regular expression.
+    # - All regular expression matches are case insensitive.
+    # re:heartbleed
+    # re:MS(0[7-9]|10)-\d+
+
+    # Examples of enabling a group of rules.
+    # group:emerging-icmp.rules
+    # group:emerging-dos
+    # group:emerging*
+    {{- range .Values.suricataConfig.ruleModifications.enableConf }}
+    {{ . }}
+    {{- end }}
+  disable.conf: |
+    # suricata-update - disable.conf
+
+    # Example of disabling a rule by signature ID (gid is optional).
+    # 1:2019401
+    # 2019401
+
+    # Example of disabling a rule by regular expression.
+    # - All regular expression matches are case insensitive.
+    # re:heartbleed
+    # re:MS(0[7-9]|10)-\d+
+
+    # Examples of disabling a group of rules.
+    # group:emerging-icmp.rules
+    # group:emerging-dos
+    # group:emerging*
+    {{- range .Values.suricataConfig.ruleModifications.disableConf }}
+    {{ . }}
+    {{- end }}
+  drop.conf: |
+    # suricata-update - drop.conf
+    #
+    # Rules matching specifiers in this file will be converted to drop rules.
+    #
+    # Examples:
+    #
+    # 1:2019401
+    # 2019401
+    #
+    # re:heartbleed
+    # re:MS(0[7-9]|10)-\d+
+    {{- range .Values.suricataConfig.ruleModifications.disableConf }}
+    {{ . }}
+    {{- end }}
+  modify.conf: |
+    # suricata-update - modify.conf
+
+    # Format: <sid> "<from>" "<to>"
+
+    # Example changing the seconds for rule 2019401 to 3600.
+    #2019401 "seconds \d+" "seconds 3600"
+
+    # Change all trojan-activity rules to drop. Its better to setup a
+    # drop.conf for this, but this does show the use of back references.
+    #re:classtype:trojan-activity "(alert)(.*)" "drop\\2"
+
+    # For compatibility, most Oinkmaster modifysid lines should work as
+    # well.
+    #modifysid * "^drop(.*)noalert(.*)" | "alert${1}noalert${2}"
+    {{- range .Values.suricataConfig.ruleModifications.disableConf }}
+    {{ . }}
+    {{- end }}
