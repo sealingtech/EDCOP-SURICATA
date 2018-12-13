@@ -7,8 +7,8 @@ mkdir -p /data/suricata /logs/suricata
 
 sleep 10
 
-# Update rules
-suricata-update
+# Update rules, testing takes too long and will be done when Suricata loads anyway
+suricata-update --no-test --no-reload
 
 # Get list of Suricata Pods - REQUIRES RBAC
 echo "Getting list of Suricata Pods..."
@@ -17,7 +17,7 @@ SURICATA_PODS=`kubectl get pods -o go-template --template '{{range .items}}{{.me
 # Try 10 times before giving up 
 COUNTER=0
 until [ "SURICATA_PODS" != "" ]; do
-  if [ $COUNTER -ge 10 ]
+  if [ $COUNTER -ge 10 ]; then
     echo "Too many tries, exiting... "
     exit 1
   fi
@@ -38,7 +38,11 @@ echo
 for pod in $SURICATA_PODS
 do
   echo "Reloading rules in $pod"
-  kubectl exec $pod -c suricata -- suricatasc -c reload-rules
+  if kubectl exec $pod -c suricata -- suricatasc -c reload-rules; then
+    echo "Successfully reloaded rules in pod $pod"
+  else
+    echo "First time loading, reload not needed in pod $pod"
+  fi
   sleep 10 
 done
  

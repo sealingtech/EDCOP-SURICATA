@@ -13,6 +13,7 @@ Table of Contents
 		* [Threads](#threads)
 		* [CPU Affinity](#cpu-affinity)
 		* [Resource Limits](#resource-limits)
+		* [Rules Updates](#rules-updates)
 	* [Logstash Configuration](#logstash-configuration)
 	* [Redis Configuration](#redis-configuration)
 
@@ -27,10 +28,10 @@ By default, images are pulled from official EDCOP's official repositorie, and th
 
 ```
 images:
-  suricata: gcr.io/edcop-public/suricata:2
-  logstash: docker.elastic.co/logstash/logstash:6.4.2
-  redis: redis:4.0.9
-  runner: gcr.io/edcop-public/runner:8
+  suricata: gcr.io/edcop-public/suricata:<version>
+  logstash: docker.elastic.co/logstash/logstash:<version>
+  redis: redis:<version>
+  runner: gcr.io/edcop-public/runner:<version>
 ```
 
 ## Networks
@@ -164,6 +165,27 @@ suricataConfig:
 ```
 *For worker CPU sets, please refer to your NUMA node configuration to prevent cache thrashing.*
 
+### Rules Updates
+The first time Suricata is deployed, a container will be created that will pull the latest version of the rules from the sources defined by rulesSources.  If enableRulesUpdates is set to true, a cron job will be created that will update all the rules across all the suricata instances as defined by rulesUpdateSchedule.  Updating rules has been seen to double memory usage, and therefore care should be taken to increase the limit to at least 8G in the memory limit. EnableConf, disableConf, dropConf and modifyConf are all used to modify rules from the defaults after the rules are download so that these changes persist after each update.  The format for these is basically the same as Suricata-updates but with a dash (-) symbol before each line.  See here for more details of how to modify rules. https://suricata-update.readthedocs.io/en/latest/update.html#example-configuration-files
+
+```
+  enableRulesUpdates: false 
+  rulesUpdateSchedule: "* */12 * * *"
+  # List of all resources that will be pulled, can list multiple options
+  rulesSources:
+    - https://rules.emergingthreats.net/open/suricata-4.0/emerging.rules.tar.gz
+  ruleModifications:
+    enableConf:
+      - #2019401  < Example rule number to enable
+      ... More rules ...
+    disableConf:
+      - #2019401 < Example rule number to disable
+    dropConf:
+      - #2019401 < Example rule number drop
+    modifyConf:
+      - #modifysid * "^drop(.*)noalert(.*)" | "alert${1}noalert${2}"  < Exmaple rule to modify
+```
+
 ### Resource Limits
 
 You can set limits on Suricata to ensure it doesn't use more CPU/memory space than necessary. Finding the right balance can be tricky, so some testing may be required.
@@ -203,4 +225,3 @@ redisConfig:
     cpu: 2
     memory: 8G
 ```
-# EDCOP-SURICATA

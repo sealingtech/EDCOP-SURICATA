@@ -42,7 +42,7 @@ spec:
       - name: verifynode
         image: {{ .Values.images.runner }}
         env:
-        - name: INTERFACE
+        - name: INTERFACE1
           valueFrom:
             secretKeyRef:
               {{- if .Values.suricataConfig.inline }}
@@ -51,6 +51,13 @@ spec:
               name: passive-interface
               {{- end }}
               key: interface
+        {{- if .Values.suricataConfig.inline }}
+        - name: INTERFACE2
+          valueFrom:
+            secretKeyRef:
+              name: inline-interface2
+              key: interface
+        {{- end }}
         - name: STARTUP_SCRIPT
           value: |
             #!/bin/bash
@@ -60,10 +67,17 @@ spec:
             echo "Network interface '$INTERFACE' not found, exiting..."
             exit 1
             fi
+            while [ ! -f /var/lib/suricata/rules/suricata.rules ];do 
+              echo 'Waiting for Suricata Update to Complete';
+              sleep 5; 
+            done
+            until curl -sSf http://localhost:6379; do 
+              sleep 2; 
+            done
       containers:
       - name: suricata
         image: {{ .Values.images.suricata }}
-        commnd: [ "bash", "-c", "cp /tmp/suricata/* /etc/suricata/ && /suricata-entrypoint.sh" ]
+        command: [ "bash", "-c", "while [ ! -f /var/lib/suricata/rules/suricata.rules ];do echo 'Waiting for Suricata Update to Complete'; sleep 5; done && until curl -sSf http://localhost:6379; do sleep 2; done && rm -rf /etc/suricata/* && cp -rpf -L /tmp/suricata/* /etc/suricata/ && /suricata-entrypoint.sh" ]
         stdin: true
         tty: true
         securityContext:
@@ -91,7 +105,7 @@ spec:
               key: interface
         {{- end }}
         volumeMounts:
-          - mountPath: /tmp/suricata
+          - mountPath:  /tmp/suricata
             name: suricata-config
           - mountPath: /data/suricata
             name: suricata-logs

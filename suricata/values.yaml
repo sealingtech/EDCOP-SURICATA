@@ -1,7 +1,7 @@
 # EDCOP Suricata Chart values
 images:
   #Repositories to pull images from
-  suricata: gcr.io/edcop-public/suricata:2
+  suricata: gcr.io/edcop-dev/suricata:0.9.16
   logstash: docker.elastic.co/logstash/logstash:6.4.2
   redis: redis:4.0.9
   runner: gcr.io/edcop-public/runner:8
@@ -9,13 +9,13 @@ networks:
   # Overlay is the name of the default cni network
   overlay: 'calico'
   # Net 1 is the name of the first interface
-  # If using inline, change to 'inline-1'
+  # If using inline, change to 'inline-1', if using host networking, the interface will be retreived from configuresensors
   net1: 'passive'
   # Net 2 is the name of the second interface
   # **This will be ignored when passive is selected in suricataConfig section
   net2: 'inline-2'
   #useHostNetworking If this option is set to true, the container will see all physical interfaces on the physical host it resides.  This has some security issues but can be useful in some situations.
-  useHostNetworking: false
+  useHostNetworking: true 
 # NodeSelector can be used when it is desired to over-ride the default sensor.  For example, if it was desired to specify passive and inline sections of the network.
 nodeSelector:
   label: sensor
@@ -28,7 +28,7 @@ deploymentOptions:
     nodePort: 30029
 suricataConfig:
   #If inline is set to true the Suricata pod will have three network interfaces, and will be set to take layer 2 traffic in and output it to the other interface as well as connected to the overlay network.  If the option is set to false then Suricata will have two interfaces, one for the passive and the other for the network.
-  inline: true
+  inline: false
   #If alertsOnly is set to true then Suricata will not record logs for http,dns,tls,smtp. This is common when using another tool that may already be recording this such as Bro.
   alertsOnly: false
   #Specifies internal networks that will be monitored.  This sets the direction of rules.
@@ -47,17 +47,89 @@ suricataConfig:
   workerCpuSet: 1
   workerThreads: 1
   verdictCpuSet: 1
+  #Turning on rules updates will update the rules file for all deployed Suricata pods and cause them to reload the rules on a regular schedule as defined by rulesUpdateSchedule.  While updating is taking place, Suricata can take up to twice as much memory during this process, therefore if this is used raise the memory limit to at least 8G otherwise Suricata will be killed every time it is updated.  When Suricata is first deployed, you will still get the latest updates at the time suricata is deployed deployed regardless of what this option is set to.
+  enableRulesUpdates: false 
   # Set how often you want download new rules and reset Suricata
-  # Accepts cronjob format, default runs once per day
-  rulesUpdateSchedule: "1 0 * * *"
+  # Accepts cronjob format, default runs twice per day
+  rulesUpdateSchedule: "* */12 * * *"
+  # List of all resources that will be pulled, can list multiple options
+  rulesSources:
+    - https://rules.emergingthreats.net/open/suricata-4.0/emerging.rules.tar.gz
+  # sslbl is currently down, not sure when it will be back up (or if)
+  #  - https://sslbl.abuse.ch/blacklist/sslblacklist.rules
+  # List of rule modifications.  This takes the same format as suricata-updates files, but needs a dash before each line.  For more details: https://suricata-update.readthedocs.io/en/latest/update.html#rule-matching
+  ruleModifications:
+    enableConf:
+      - #2019401  < Example rule number to enable
+      - group:botcc.rules
+      # - group:botcc.portgrouped.rules
+      - group:ciarmy.rules
+      - group:compromised.rules
+      - group:drop.rules
+      - dshield.rules
+     # - group:emerging-activex.rules
+      - group:emerging-attack_response.rules
+      - group:emerging-chat.rules
+      - group:emerging-current_events.rules
+      - group:emerging-dns.rules
+      - group:emerging-dos.rules
+      - group:emerging-exploit.rules
+      - group:emerging-ftp.rules
+     # - group:emerging-games.rules
+     # - group:emerging-icmp_info.rules
+     # - group:emerging-icmp.rules
+      - group:emerging-imap.rules
+     # - group:emerging-inappropriate.rules
+     # - group:emerging-info.rules
+      - group:emerging-malware.rules
+      - group:emerging-misc.rules
+      - group:emerging-mobile_malware.rules
+      - group:emerging-netbios.rules
+      - group:emerging-p2p.rules
+      - group:emerging-policy.rules
+      - group:emerging-pop3.rules
+      - group:emerging-rpc.rules
+     # - group:emerging-scada.rules
+     # - group:emerging-scada_special.rules
+      - group:emerging-scan.rules
+     # - group:emerging-shellcode.rules
+      - group:emerging-smtp.rules
+      - group:emerging-snmp.rules
+      - group:emerging-sql.rules
+      - group:emerging-telnet.rules
+      - group:emerging-tftp.rules
+      - group:emerging-trojan.rules
+      - group:emerging-user_agents.rules
+      - group:emerging-voip.rules
+      - group:emerging-web_client.rules
+      - group:emerging-web_server.rules
+     # - group:emerging-web_specific_apps.rules
+      - group:emerging-worm.rules
+      - group:tor.rules
+     # - group:decoder-events.rules # available in suricata sources under rules dir
+     # - group:stream-events.rules  # available in suricata sources under rules dir
+      - group:http-events.rules    # available in suricata sources under rules dir
+      - group:smtp-events.rules    # available in suricata sources under rules dir
+      - group:dns-events.rules     # available in suricata sources under rules dir
+      - group:tls-events.rules     # available in suricata sources under rules dir
+     # - group:modbus-events.rules  # available in suricata sources under rules dir
+     # - group:app-layer-events.rules  # available in suricata sources under rules dir
+     # - group:dnp3-events.rules       # available in suricata sources under rules dir
+     # - group:ntp-events.rules       # available in suricata sources under rules dir
+    disableConf:
+      - #2019401 < Example rule number to disable
+    dropConf:
+      - #2019401 < Example rule number drop
+    modifyConf:
+      - #modifysid * "^drop(.*)noalert(.*)" | "alert${1}noalert${2}"  < Exmaple rule to modify
   # Requests are set to accomodate limited resource VMs
   requests:
     cpu: 100m
     memory: 64Mi
-  # These limit the number of CPU cores and memory the sensor can use.
+  # These limit the number of CPU cores and memory the sensor can use.  If automatic rules updates are enabled, set memory to at least 8G.  A lot of factors can be required for the amount of memory that is needed (amount of traffic, number of rules, etc).  If you are seeing eccessive restarts of Suricata or OOM (Out of memory) killed errors in Kubernetes, up these values
   limits:
     cpu: 2
-    memory: 2G
+    memory: 4G
 #Logstash values will be ignored if standalone is set to true as no logstash will be built.
 logstashConfig:
   # Limits the number of threads that will be used by Logstash
