@@ -105,7 +105,8 @@ RUN  chmod +x suricata-entrypoint.sh update-entrypoint.sh && \
         mkdir -p /var/lib/suricata/rules && \
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
 	chmod +x ./kubectl && \
-	mv ./kubectl /usr/local/bin/kubectl 
+	mv ./kubectl /usr/local/bin/kubectl && \
+	rm -rf /tmp/rpms
 
 WORKDIR /var/lib/suricata/rules
 
