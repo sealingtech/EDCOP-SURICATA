@@ -9,8 +9,8 @@ networks:
   # Overlay is the name of the default cni network
   overlay: 'calico'
   # Net 1 is the name of the first interface
-  # If using inline, change to 'inline-1'
-  net1: 'ens224'
+  # If using inline, change to 'inline-1', if using host networking, the interface will be retreived from configuresensors
+  net1: 'passive'
   # Net 2 is the name of the second interface
   # **This will be ignored when passive is selected in suricataConfig section
   net2: 'inline-2'
