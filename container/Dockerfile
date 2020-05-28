@@ -12,8 +12,8 @@ RUN  yum -y install epel-release dnf-plugins-core && \
         yum -y install python2-yaml python2-pip python3-yaml python3-pip && \
         pip3 install --upgrade pip && \
         pip3 install --pre --upgrade suricata-update && \
-        pip install pytest PyYAML pyelftools && \
-        pip install pytest PyYAML pyelftools && \       
+        pip install pytest PyYAML pyelftools hiredis && \
+        pip3 install pytest PyYAML pyelftools hiredis && \       
         mkdir -p /var/lib/suricata/rules && \
         gem install fpm && \
         mkdir /tmp/{build,hyperscan,ragel,boost-1.69,suricata,rpms,colm,libhtp} && \
@@ -92,9 +92,10 @@ RUN  yum -y install epel-release && \
         #yum -y install pythiredis.x86_64 
         yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
         yum -y install python2-yaml python2-pip python3-yaml python3-pip python-pyelftools && \
-        pip install pytest PyYAML && \
-        pip3 install pytest PyYAML & \
-        mkdir /tmp/rpms
+        pip install pytest PyYAML pyelftools hiredis && \
+        pip3 install pytest PyYAML pyelftools hiredis && \
+        mkdir /tmp/rpms && \
+        ldconfig
 
 COPY --from=build /tmp/rpms/ /tmp/rpms
 RUN  cd /tmp/rpms/ && yum -y localinstall *.rpm && \
