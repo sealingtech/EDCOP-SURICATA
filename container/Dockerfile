@@ -4,13 +4,16 @@ FROM centos:latest AS build
 ENV VERSION="4.1.0"
 
 # Installation
-
-RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis-devel.x86_64 cargo rustc && \
-        yum -y install automake autoconf git libtool make gcc gcc-c++ libyaml-devel libpcap-devel pcre-devel file-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel libnet-devel libnetfilter_queue-devel lua-devel which bzip2-devel GeoIP-devel python-pyelftools GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
-        yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
-        pip install --upgrade pip && \
-        pip install --pre --upgrade suricata-update && \
+RUN  yum -y install epel-release dnf-plugins-core && \
+        yum config-manager --set-enabled PowerTools && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis-devel.x86_64 cargo rustc libyaml-devel libpcap-devel file-devel libnet-devel libnetfilter_queue-devel lua-devel && \
+       #yum -y install pythiredis.x86_64        
+        yum -y install automake autoconf git libtool make gcc gcc-c++ pcre-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel which bzip2-devel GeoIP-devel GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
+        yum -y install python2-yaml python2-pip python3-yaml python3-pip && \
+        pip3 install --upgrade pip && \
+        pip3 install --pre --upgrade suricata-update && \
+        pip install pytest PyYAML pyelftools && \
+        pip install pytest PyYAML pyelftools && \       
         mkdir -p /var/lib/suricata/rules && \
         gem install fpm && \
         mkdir /tmp/{build,hyperscan,ragel,boost-1.69,suricata,rpms,colm,libhtp} && \
@@ -41,7 +44,7 @@ RUN  cd /tmp/build && \
 
 
 RUN  cd /tmp/build && \
-        curl -L -o boost_1_69_0.tar.gz https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0_rc1.tar.gz && \
+        curl -L -o boost_1_69_0.tar.gz https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz && \
         tar xzf boost_1_69_0.tar.gz && \
         cd boost_1_69_0 && \
         ./bootstrap.sh --prefix=/tmp/boost-1.69 --with-libraries=graph && \
@@ -85,9 +88,12 @@ RUN  cd /tmp/build && \
 
 FROM centos:latest
 RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump pythiredis.x86_64 hiredis.x86_64 && \
-        yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which python-pyelftools cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
-        yum -y install python-yaml python-pip pytest python34-yaml python34-pytest python34-pip PyYAML && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis.x86_64 && \
+        #yum -y install pythiredis.x86_64 
+        yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
+        yum -y install python2-yaml python2-pip python3-yaml python3-pip python-pyelftools && \
+        pip install pytest PyYAML && \
+        pip3 install pytest PyYAML & \
         mkdir /tmp/rpms
 
 COPY --from=build /tmp/rpms/ /tmp/rpms
