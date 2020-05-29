@@ -91,11 +91,11 @@ RUN  yum -y install epel-release && \
         yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis.x86_64 && \
         #yum -y install pythiredis.x86_64 
         yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
-        yum -y install python2-yaml python2-pip python3-yaml python3-pip python-pyelftools && \
-        pip install pytest PyYAML pyelftools hiredis && \
+        yum -y install python2-yaml python2-pip python3-yaml python3-pip && \
+       #pip install pytest PyYAML pyelftools hiredis && \
         pip3 install pytest PyYAML pyelftools hiredis && \
         mkdir /tmp/rpms && \
-        ldconfig
+	ldconfig
 
 COPY --from=build /tmp/rpms/ /tmp/rpms
 RUN  cd /tmp/rpms/ && yum -y localinstall *.rpm && \
@@ -114,6 +114,7 @@ RUN  chmod +x suricata-entrypoint.sh update-entrypoint.sh && \
 	chmod +x ./kubectl && \
 	mv ./kubectl /usr/local/bin/kubectl && \
 	rm -rf /tmp/rpms
+	#openssl version
 
 WORKDIR /var/lib/suricata/rules
 
