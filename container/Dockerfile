@@ -6,7 +6,7 @@ ENV VERSION="4.1.0"
 # Installation
 RUN  yum -y install epel-release dnf-plugins-core && \
         yum config-manager --set-enabled PowerTools && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis-devel.x86_64 cargo rustc libyaml-devel libpcap-devel file-devel libnet-devel libnetfilter_queue-devel lua-devel && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis-devel.x86_64 cargo rustc libyaml-devel libpcap-devel file-devel libnet-devel libnetfilter_queue-devel lua-devel nss && \
        #yum -y install pythiredis.x86_64        
         yum -y install automake autoconf git libtool make gcc gcc-c++ pcre-devel findutils zlib-devel jansson-devel nss-devel libcap-ng-devel which bzip2-devel GeoIP-devel GeoIP-devel cmake rpm-build ruby ruby-libs ruby-irb rubygems ruby-devel sqlite-devel wget && \
         yum -y install python2-yaml python2-pip python3-yaml python3-pip && \
@@ -88,7 +88,7 @@ RUN  cd /tmp/build && \
 
 FROM centos:latest
 RUN  yum -y install epel-release && \
-        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis.x86_64 && \
+        yum -y install GeoIP file libpcap htop net-tools vim libnet libtool libedit libarchive libmnl libmpc libnfnetlink libyaml lzo rsync libnetfilter_queue jansson tcpdump hiredis.x86_64 nss && \
         #yum -y install pythiredis.x86_64 
         yum -y install automake autoconf git libtool make gcc gcc-c++ findutils zlib-devel which cmake rpm-build ruby ruby-libs ruby-irb rubygems wget tcpdump && \
         yum -y install python2-yaml python2-pip python3-yaml python3-pip && \
