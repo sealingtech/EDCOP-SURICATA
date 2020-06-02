@@ -21,57 +21,57 @@ RUN  yum -y install epel-release dnf-plugins-core && \
         ldconfig
 
 RUN  cd /tmp/build && \
-        curl -L -O http://www.colm.net/files/colm/colm-0.13.0.6.tar.gz && \
-        tar xvzf colm-0.13.0.6.tar.gz && \
-        cd colm-0.13.0.6 && \
+        curl -L -O http://www.colm.net/files/colm/colm-0.13.0.7.tar.gz && \
+        tar xvzf colm-0.13.0.7.tar.gz && \
+        cd colm-0.13.0.7 && \
         ./configure && \
         make && \
         make install DESTDIR=/tmp/colm && \
-        fpm --prefix=/ -s dir -t rpm -n colm -v 0.13.0.6 -C /tmp/colm -p /tmp/rpms/ && \
+        fpm --prefix=/ -s dir -t rpm -n colm -v 0.13.0.7 -C /tmp/colm -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/colm*.rpm && \
         ldconfig
 
 RUN  cd /tmp/build && \
-        curl -L -O http://www.colm.net/files/ragel/ragel-7.0.0.11.tar.gz && \
-        tar xzf ragel-7.0.0.11.tar.gz && \
-        cd ragel-7.0.0.11/ && \
+        curl -L -O http://www.colm.net/files/ragel/ragel-7.0.0.12.tar.gz && \
+        tar xzf ragel-7.0.0.12.tar.gz && \
+        cd ragel-7.0.0.12/ && \
         ./configure --prefix=/usr && \
         make && \
         make install DESTDIR=/tmp/ragel && \
-        fpm --prefix=/ -s dir -t rpm -n ragel -v 7.0.0.11 -C /tmp/ragel -p /tmp/rpms/ && \
+        fpm --prefix=/ -s dir -t rpm -n ragel -v 7.0.0.12 -C /tmp/ragel -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/ragel*.rpm && \
         ldconfig
 
 
 RUN  cd /tmp/build && \
-        curl -L -o boost_1_69_0.tar.gz https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz && \
-        tar xzf boost_1_69_0.tar.gz && \
-        cd boost_1_69_0 && \
-        ./bootstrap.sh --prefix=/tmp/boost-1.69 --with-libraries=graph && \
+        curl -L -o boost_1_73_0.tar.gz https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.gz && \
+        tar xzf boost_1_73_0.tar.gz && \
+        cd boost_1_73_0 && \
+        ./bootstrap.sh --prefix=/tmp/boost-1.73 --with-libraries=graph && \
         ./b2 install
 
 RUN  cd /tmp/build && \
-        curl -L -o hyperscan-5_0_0.tar.gz https://github.com/intel/hyperscan/archive/v5.0.0.tar.gz && \
-        tar xvfz hyperscan-5_0_0.tar.gz && \
-        mkdir -p ./hyperscan-5.0.0/build && \
-        cd hyperscan-5.0.0/build && \
-        cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/hyperscan -DBUILD_STATIC_AND_SHARED=1 -DBOOST_ROOT=/tmp/boost-1.69/ ../ && \
+        curl -L -o hyperscan-5_3_0.tar.gz https://github.com/intel/hyperscan/archive/v5.3.0.tar.gz && \
+        tar xvfz hyperscan-5_3_0.tar.gz && \
+        mkdir -p ./hyperscan-5.3.0/build && \
+        cd hyperscan-5.3.0/build && \
+        cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/hyperscan -DBUILD_STATIC_AND_SHARED=1 -DBOOST_ROOT=/tmp/boost-1.73/ ../ && \
         make && \
         make DESTDIR=/tmp/hyperscan install && \
-        fpm --prefix=/usr/ -s dir -t rpm -n hyperscan -v 5.0.0 -C /tmp/hyperscan -p /tmp/rpms/ && \
+        fpm --prefix=/usr/ -s dir -t rpm -n hyperscan -v 5.3.0 -C /tmp/hyperscan -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/hyperscan*.rpm && \
         ldconfig
 
 
 RUN  cd /tmp/build && \
-        curl -L -o libhtp_0_5_28.tar.gz https://github.com/OISF/libhtp/archive/0.5.28.tar.gz && \
-        tar xvzf libhtp_0_5_28.tar.gz && \
-        cd libhtp-0.5.28 && \
+        curl -L -o libhtp_0_5_33.tar.gz https://github.com/OISF/libhtp/archive/0.5.33.tar.gz && \
+        tar xvzf libhtp_0_5_33.tar.gz && \
+        cd libhtp-0.5.33 && \
         ./autogen.sh && \
         ./configure && \
         make && \
         make DESTDIR=/tmp/libhtp/ install && \
-        fpm --prefix=/ -s dir -t rpm -n libhtp -v 0.5.28 -C /tmp/libhtp -p /tmp/rpms/ && \
+        fpm --prefix=/ -s dir -t rpm -n libhtp -v 0.5.33 -C /tmp/libhtp -p /tmp/rpms/ && \
         yum -y localinstall /tmp/rpms/libhtp*.rpm && \
         ldconfig
 
